@@ -116,6 +116,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? site.url).toString()
 
     <script>
       import Lenis from 'lenis';
+      import { TOUCH_QUERY } from '../lib/tactil';
 
       // ── Scroll suave (Lenis) ──────────────────────────────────────────
       // Inercia en la rueda: el scroll sigue moviéndose un instante después
@@ -176,7 +177,11 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? site.url).toString()
       // Un solo rAF para todas las capas. Se mueve `transform` vía una
       // custom property, no `background-position`: así el trabajo queda en
       // el compositor y no repinta en cada frame.
-      const parallaxOff = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      // En táctil también: en iPhone el scroll va en otro hilo y el fondo
+      // movido desde acá llega tarde, se ve arrastrado.
+      const parallaxOff =
+        window.matchMedia('(prefers-reduced-motion: reduce)').matches ||
+        window.matchMedia(TOUCH_QUERY).matches;
       const layers = Array.from(
         document.querySelectorAll<HTMLElement>('[data-parallax]')
       ).map((el) => ({ el, speed: parseFloat(el.dataset.parallax ?? '0.1') }));

@@ -1357,3 +1357,71 @@ html[data-tema='noche'] {
     transform: none;
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Pantallas táctiles — aliviar Safari de iPhone
+   En iOS el scroll corre en un hilo propio y todo lo que se mueve con él
+   desde JavaScript llega un frame tarde: se siente pesado. Acá va la mitad
+   CSS del ajuste; la mitad JS (parallax, galería, Showcase) lee la misma
+   media query. En desktop no cambia nada.
+   ═══════════════════════════════════════════════════════════════════════════ */
+@media (hover: none) and (pointer: coarse) {
+  /* El vidrio: `backdrop-filter` sobre tarjetas grandes es de lo más caro
+     para la GPU del teléfono, y más con contenido moviéndose detrás. Sin
+     blur, el relleno sube un poco para que el texto conserve el contraste. */
+  @layer components {
+    .air-card-glass {
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+      background-color: rgb(var(--papel-rgb) / 0.9);
+    }
+    .air-card-air {
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+      background-color: rgb(var(--papel-rgb) / 0.82);
+    }
+    /* Sin movimiento de fondo: el parallax está apagado en táctil y la
+       capa ya no necesita su propia textura en la GPU. */
+    .air-bleed::before,
+    .air-drift {
+      will-change: auto;
+    }
+  }
+
+  /* Las entradas: en el teléfono se scrollea rápido y 900ms más la cascada
+     se leían como contenido que tarda en llegar. */
+  @layer utilities {
+    .js .air-reveal {
+      transform: translateY(16px);
+      transition-duration: 500ms;
+      transition-delay: calc(var(--reveal-delay, 0ms) / 2);
+    }
+  }
+}
+
+/* Las dos versiones de la galería salen del servidor (HeroParallax.tsx) y
+   esto elige cuál se ve, sin esperar a que hidrate React. La tarjeta de
+   Showcase llega derecha en táctil por la misma razón: el SSR la pinta
+   inclinada y, sin esto, se enderezaría de golpe al hidratar. */
+@layer utilities {
+  .solo-tactil {
+    display: none;
+  }
+  @media (hover: none) and (pointer: coarse) {
+    .solo-tactil {
+      display: block;
+    }
+    .sin-tactil {
+      display: none;
+    }
+    .showcase-quieta {
+      transform: none !important;
+      will-change: auto !important;
+    }
+    /* El -mt-8 de la tarjeta contaba con que el título subiera 60px al
+       scrollear; quieto, el título quedaba montado sobre el borde. */
+    .showcase-tarjeta {
+      margin-top: var(--spacing-16, 1rem);
+    }
+  }
+}

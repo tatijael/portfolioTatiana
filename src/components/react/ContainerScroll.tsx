@@ -1,5 +1,5 @@
 import React, {useRef} from 'react';
-import {useScrollProgress, lerp} from './useScrollProgress';
+import {useScrollProgress, lerp, TOUCH_QUERY} from './useScrollProgress';
 
 /**
  * ContainerScroll — la pantalla que rota y se endereza al entrar en viewport.
@@ -35,9 +35,15 @@ export const ContainerScroll = ({
   children: React.ReactNode;
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
+  // En táctil la tarjeta ya llega derecha (clase `.showcase-quieta` en
+  // global.css) y ni siquiera se escucha el scroll.
+  const [touch, setTouch] = React.useState(false);
+  React.useEffect(() => {
+    setTouch(window.matchMedia(TOUCH_QUERY).matches);
+  }, []);
   // `to: 0.5` → la tarjeta termina de enderezarse justo cuando la sección
   // queda centrada en pantalla, y se mantiene plana de ahí en adelante.
-  const p = useScrollProgress(containerRef, {from: 0.06, to: 0.5});
+  const p = useScrollProgress(containerRef, {from: 0.06, to: 0.5, enabled: !touch});
 
   const [isMobile, setIsMobile] = React.useState(false);
   React.useEffect(() => {
@@ -58,14 +64,14 @@ export const ContainerScroll = ({
     >
       <div className="relative w-full py-4 md:py-8" style={{perspective: '1000px'}}>
         <div
-          className="mx-auto max-w-5xl text-center"
+          className="showcase-quieta mx-auto max-w-5xl text-center"
           style={{transform: `translateY(${translate}px)`}}
         >
           {titleComponent}
         </div>
 
         <div
-          className="mx-auto -mt-8 h-[24rem] w-full max-w-5xl rounded-[var(--radius-xl)] border border-ink/15 bg-surface p-2 md:h-[34rem] md:p-3"
+          className="showcase-quieta showcase-tarjeta mx-auto -mt-8 h-[24rem] w-full max-w-5xl rounded-[var(--radius-xl)] border border-ink/15 bg-surface p-2 md:h-[34rem] md:p-3"
           style={{
             transform: `rotateX(${rotate}deg) scale(${scale})`,
             willChange: 'transform',

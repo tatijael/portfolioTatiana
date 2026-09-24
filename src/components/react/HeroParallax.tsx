@@ -1,5 +1,5 @@
 import React from 'react';
-import {useScrollProgress, lerp} from './useScrollProgress';
+import {useScrollProgress, lerp, TOUCH_QUERY} from './useScrollProgress';
 
 /**
  * HeroParallax — tres filas de tarjetas que se desplazan en direcciones
@@ -17,6 +17,11 @@ import {useScrollProgress, lerp} from './useScrollProgress';
  *   - Respeta `prefers-reduced-motion`: sin movimiento, las filas quedan
  *     quietas y legibles.
  *
+ * En pantallas táctiles no hay nada de eso: una sola fila que se desliza
+ * con el dedo, con cada captura una vez. Las dos versiones salen del
+ * servidor y el CSS muestra una (`.solo-tactil` / `.sin-tactil`), así no hay
+ * salto al hidratar.
+ *
  * NOTA: está pensado para ~15 imágenes (3 filas de 5). Con menos, las repite
  * cíclicamente para no dejar huecos.
  */
@@ -32,8 +37,10 @@ export const HeroParallax = ({
   subtitle?: string;
 }) => {
   const [reduce, setReduce] = React.useState(false);
+  const [touch, setTouch] = React.useState(false);
   React.useEffect(() => {
     setReduce(window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+    setTouch(window.matchMedia(TOUCH_QUERY).matches);
   }, []);
 
   const filled = React.useMemo(() => {
@@ -42,7 +49,7 @@ export const HeroParallax = ({
   }, [items]);
 
   const ref = React.useRef<HTMLDivElement>(null);
-  const p = useScrollProgress(ref);
+  const p = useScrollProgress(ref, {enabled: !touch});
 
   if (!filled.length) return null;
 
@@ -74,7 +81,16 @@ export const HeroParallax = ({
         </div>
       )}
 
+      <div className="solo-tactil">
+        <div className="flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-px-4 px-4 pb-2 [scrollbar-width:none]">
+          {items.map((item, i) => (
+            <Tile item={item} key={i} tactil />
+          ))}
+        </div>
+      </div>
+
       <div
+        className="sin-tactil"
         style={{
           transform: `rotateX(${rotateX}deg) rotateZ(${rotateZ}deg) translateY(${translateY}px)`,
           opacity,
@@ -108,7 +124,7 @@ const Row = ({
   </div>
 );
 
-const Tile = ({item}: {item: ParallaxItem}) => {
+const Tile = ({item, tactil = false}: {item: ParallaxItem; tactil?: boolean}) => {
   const inner = (
     <>
       <img
@@ -120,14 +136,25 @@ const Tile = ({item}: {item: ParallaxItem}) => {
       />
       {/* Placa Haze con texto Ink: reemplaza el velo negro + texto blanco del
           original, que no llegaba a contraste AA sobre foto. */}
-      <span className="absolute bottom-3 left-3 rounded-[var(--radius-buttons)] bg-surface/95 px-3 py-1.5 text-[13px] font-medium text-ink opacity-0 transition-opacity duration-200 group-hover/tile:opacity-100">
+      {/* En táctil no hay hover que la destape: el título queda siempre. */}
+      <span
+        className={`absolute bottom-3 left-3 rounded-[var(--radius-buttons)] bg-surface/95 px-3 py-1.5 text-[13px] font-medium text-ink ${
+          tactil ? '' : 'opacity-0 transition-opacity duration-200 group-hover/tile:opacity-100'
+        }`}
+      >
         {item.title}
       </span>
     </>
   );
 
   return (
-    <div className="group/tile relative h-72 w-[24rem] flex-shrink-0 overflow-hidden rounded-[var(--radius-images)] border border-ink/10 transition-transform duration-300 hover:-translate-y-3">
+    <div
+      className={`group/tile relative flex-shrink-0 overflow-hidden rounded-[var(--radius-images)] border border-ink/10 ${
+        tactil
+          ? 'h-56 w-[80vw] max-w-[24rem] snap-start'
+          : 'h-72 w-[24rem] transition-transform duration-300 hover:-translate-y-3'
+      }`}
+    >
       {item.link ? (
         <a href={item.link} target="_blank" rel="noreferrer" className="block h-full w-full">
           {inner}

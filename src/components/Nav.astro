@@ -169,6 +169,16 @@ import { nav, site } from '../data/site';
     -webkit-backdrop-filter: blur(12px) saturate(1.2);
     border-bottom: 1px solid rgb(var(--tinta-rgb) / 0.1);
   }
+  /* En táctil, sin blur: la página entera pasa por debajo de la barra en
+     cada scroll y en iPhone ese desenfoque se paga en cada frame. Casi
+     opaca, no se nota la diferencia. */
+  @media (hover: none) and (pointer: coarse) {
+    [data-nav][data-scrolled='true'] {
+      background-color: rgb(var(--lienzo-rgb) / 0.96);
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+    }
+  }
 
   /* ── El botón de menú ─────────────────────────────────────────────────
      Lleva la palabra "Menú" al lado del icono y no solo el icono: dos

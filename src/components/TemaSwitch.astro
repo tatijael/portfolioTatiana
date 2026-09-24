@@ -124,6 +124,13 @@ import { temas } from '../data/site';
       background-color 420ms ease,
       border-color 420ms ease;
   }
+  /* Flota fija sobre todo lo que scrollea: en táctil va sin blur. */
+  @media (hover: none) and (pointer: coarse) {
+    .tema__pastilla {
+      backdrop-filter: none;
+      background-color: rgb(var(--papel-rgb) / 0.92);
+    }
+  }
 
   .tema__opcion {
     display: grid;

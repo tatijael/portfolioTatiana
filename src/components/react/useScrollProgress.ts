@@ -1,5 +1,7 @@
 import {useEffect, useState, type RefObject} from 'react';
 
+export {TOUCH_QUERY} from '../../lib/tactil';
+
 /**
  * Progreso de scroll de un elemento, medido a mano.
  *
@@ -23,13 +25,13 @@ import {useEffect, useState, type RefObject} from 'react';
  */
 export function useScrollProgress(
   ref: RefObject<HTMLElement | null>,
-  {from = 0, to = 1}: {from?: number; to?: number} = {},
+  {from = 0, to = 1, enabled = true}: {from?: number; to?: number; enabled?: boolean} = {},
 ) {
   const [progress, setProgress] = useState(0);
 
   useEffect(() => {
     const el = ref.current;
-    if (!el) return;
+    if (!el || !enabled) return;
 
     let ticking = false;
 
@@ -59,7 +61,7 @@ export function useScrollProgress(
       window.removeEventListener('scroll', onScroll);
       window.removeEventListener('resize', onScroll);
     };
-  }, [ref, from, to]);
+  }, [ref, from, to, enabled]);
 
   return progress;
 }
