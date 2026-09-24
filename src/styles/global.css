@@ -36,13 +36,16 @@
   /* ── Colores ─────────────────────────────────────────────────────────── */
   --color-whiteout: #ffffff;
   --color-haze: #f5f5f5;
-  --color-ink: #1b1b1b;
+  --color-ink: #1f2a3a;
   --color-black-void: #000000;
   /* Vuelve a tener uso en el tema claro: está calibrado para leerse sobre
      blanco (6.29:1 sobre el lienzo) y es el frío disponible del sistema si
      alguna vez hace falta algo que no sea rosa. */
   --color-twilight-blue: #426188;
   --color-signal-blue: #2b7fff;
+  /* Coral: SOLO palabras acento grandes (Caveat). Mide 2.7:1 sobre el
+     lienzo, así que nunca va en texto de cuerpo ni en labels. */
+  --color-coral: #e0845f;
 
   /* ── Tokens que no están en design-tokens.json ─────────────────────────
      El sistema Air define una paleta neutra —blanco, haze, tinta, negro— y
@@ -66,22 +69,22 @@
 
      ACENTO
      Rosewood es el único acento saturado, y está bajado en luminosidad
-     hasta pasar AA como texto: 5.84:1 sobre el lienzo y 5.23:1 sobre el
-     lavado rosa, que es la parada más oscura y por lo tanto el peor caso.
-     Rosewood Soft (#b4636f) es el rosa "lindo" de la paleta pero mide
-     4.19:1 sobre blanco: NO va en texto normal. Queda para display grande
+     hasta pasar AA como texto: 7.0:1 sobre el lienzo y 6.4:1 sobre el
+     lavado celeste, que es la parada más oscura y por lo tanto el peor caso.
+     Rosewood Soft (#5a88b5) es el celeste "lindo" de la paleta pero mide
+     3.73:1 sobre blanco: NO va en texto normal. Queda para display grande
      (que pide 3:1) y para trazos decorativos.
 
      Petal es la hairline pastel: no es texto, no entra en el cálculo. */
   --color-canvas: #fffdfb;
-  --color-ink-soft: #33302f;
+  --color-ink-soft: #3a4759;
   --color-surface: #ffffff;
-  --color-surface-raised: #fdf6f3;
-  --color-blush: #fbeef0;
+  --color-surface-raised: #f4f8fc;
+  --color-blush: #edf3fa;
   --color-peach: #fdeee2;
-  --color-petal: #e8cfc6;
-  --color-rosewood: #9d4a58;
-  --color-rosewood-soft: #b4636f;
+  --color-petal: #dbe8f4;
+  --color-rosewood: #3c5a7d;
+  --color-rosewood-soft: #5a88b5;
 
   /* ── Familias tipográficas ───────────────────────────────────────────── */
   --font-control: 'Inter Variable', ui-sans-serif, system-ui, -apple-system,
@@ -207,11 +210,11 @@
      Hero Mist es el gris del texto secundario del hero. Subió de #a1a1aa
      (calibrado para leerse sobre negro) a un gris cálido que mide 5.21:1
      sobre el lienzo: el mismo rol, recalibrado para el fondo nuevo. */
-  --hero-blush: #f2c9cf;
+  --hero-blush: #dbe8f4;
   --hero-peach: #f8d8bf;
-  --hero-rose-line: #c97f8b;
-  --hero-mist: #6f6a72;
-  --hero-line: #1b1b1b1f;
+  --hero-rose-line: #3c5a7d;
+  --hero-mist: #5d6878;
+  --hero-line: #1f2a3a1f;
 
   --font-hero-display: 'Archivo Variable', 'Inter Variable', ui-sans-serif,
     system-ui, sans-serif;
@@ -274,7 +277,7 @@
    Cada tema se calibró contra su propio peor caso, que es la parada más
    oscura de su lavado, no el lienzo pelado:
 
-       suave / media   tinta #1b1b1b sobre #fbeef0 → 15.3:1
+       suave / media   tinta #1f2a3a sobre #edf3fa → 13.0:1
        calida          tinta #1b1b1b sobre #fbdcbb → 13.9:1
                        acento #a8502f sobre #fffaf4 → 5.9:1
        noche           tinta #eef2f8 sobre #0d1420 → 16.1:1
@@ -291,25 +294,25 @@
 :root,
 html[data-tema='media'] {
   --color-canvas: #fffdfb;
-  --color-ink: #1b1b1b;
-  --color-ink-soft: #33302f;
+  --color-ink: #1f2a3a;
+  --color-ink-soft: #3a4759;
   --color-surface: #ffffff;
-  --color-surface-raised: #fdf6f3;
-  --color-blush: #fbeef0;
+  --color-surface-raised: #f4f8fc;
+  --color-blush: #edf3fa;
   --color-peach: #fdeee2;
-  --color-petal: #e8cfc6;
-  --color-rosewood: #9d4a58;
-  --color-rosewood-soft: #b4636f;
+  --color-petal: #dbe8f4;
+  --color-rosewood: #3c5a7d;
+  --color-rosewood-soft: #5a88b5;
 
-  --tinta-rgb: 27 27 27;
+  --tinta-rgb: 31 42 58;
   --papel-rgb: 255 255 255;
   --lienzo-rgb: 255 253 251;
 
-  --hero-blush: #f2c9cf;
+  --hero-blush: #dbe8f4;
   --hero-peach: #f8d8bf;
-  --hero-rose-line: #c97f8b;
-  --hero-mist: #6f6a72;
-  --hero-line: #1b1b1b1f;
+  --hero-rose-line: #3c5a7d;
+  --hero-mist: #5d6878;
+  --hero-line: #1f2a3a1f;
 }
 
 /* ── Tema 1: suave ──────────────────────────────────────────────────────
@@ -318,25 +321,25 @@ html[data-tema='media'] {
    para leer, no para mirar. */
 html[data-tema='suave'] {
   --color-canvas: #fffdfb;
-  --color-ink: #1b1b1b;
-  --color-ink-soft: #33302f;
+  --color-ink: #1f2a3a;
+  --color-ink-soft: #3a4759;
   --color-surface: #ffffff;
-  --color-surface-raised: #fefaf8;
-  --color-blush: #fdf7f6;
+  --color-surface-raised: #f9fbfd;
+  --color-blush: #f4f9fd;
   --color-peach: #fdf9f4;
-  --color-petal: #f0ded8;
-  --color-rosewood: #9d4a58;
-  --color-rosewood-soft: #b4636f;
+  --color-petal: #dce8f1;
+  --color-rosewood: #3c5a7d;
+  --color-rosewood-soft: #5a88b5;
 
-  --tinta-rgb: 27 27 27;
+  --tinta-rgb: 31 42 58;
   --papel-rgb: 255 255 255;
   --lienzo-rgb: 255 253 251;
 
-  --hero-blush: #f8e4e5;
+  --hero-blush: #e0eff8;
   --hero-peach: #fbecdf;
-  --hero-rose-line: #d8a3aa;
-  --hero-mist: #6f6a72;
-  --hero-line: #1b1b1b17;
+  --hero-rose-line: #a6c8e0;
+  --hero-mist: #5d6878;
+  --hero-line: #1f2a3a17;
 }
 
 /* ── Tema 3: cálida ─────────────────────────────────────────────────────
@@ -1055,6 +1058,7 @@ html[data-tema='noche'] {
        con Inter al mismo tamaño nominal */
     font-size: 1.18em;
     line-height: 1;
+    color: var(--color-coral);
   }
 
   /* ── Eyebrow / label de sección ────────────────────────────────────── */

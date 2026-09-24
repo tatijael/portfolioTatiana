@@ -5,7 +5,6 @@
  *
  * Extraído de tus proyectos existentes:
  *   proyect-astro/          → bio, experiencia, skills, contacto
- *   portfolioTatiana/       → Tatiana Storefront (Shopify Hydrogen)
  *   EmpreTati/              → Cherry Muse (Next.js + Supabase)
  *
  * ⚠️ Revisá los campos marcados con TODO: son los que no pude verificar.
@@ -64,11 +63,10 @@ export const socials = [
    la página. Si agregás una sección a index.astro, va también acá: el menú
    no se arma solo.
 
-   ⚠️ Con ocho ítems la fila mide 967px junto al logo y al botón, y la barra
-   horizontal aparece recién en `lg` (1024px): quedan 57px de margen. No es
-   mucho. Si sumás un noveno ítem, medí antes — con `gap-4` cada entrada se
-   come unos 80px y ya no entra. La salida en ese caso es subir el corte a
-   `xl`, no achicar más el aire.
+   Desde `lg` se muestran como una tira de links en la barra (sin
+   Contacto, que ya es el botón de al lado); debajo de `lg` van en el panel
+   del botón "Menú". ⚠️ Con siete links la tira entra con poco margen en
+   1024px: si sumás uno, medí antes y, si no entra, subí el corte a `xl`.
 
    "Contacto" está repetido en el botón "Trabajemos juntos", que apunta al
    mismo ancla. Es a propósito: el botón es la acción, el ítem del menú es
@@ -165,11 +163,18 @@ export type Project = {
   /** TODO: agregá el repo si es público (o dejá null) */
   repo: string | null;
   image: string | null;
+  /** 'contain' muestra la imagen entera sobre blanco en vez de recortarla;
+      'top' la recorta igual que 'cover' pero anclada arriba (para capturas
+      de apps, donde lo importante es el encabezado y el menú). */
+  imageFit?: 'cover' | 'contain' | 'top';
 };
 
 export const projects: readonly Project[] = [
   /* ── Trabajo de cliente ─────────────────────────────────────────────────
-     Estos tres venían del portfolio nuevo y no estaban acá. Van primero a
+     Venían del portfolio nuevo. "Sitio industrial" se sacó el 2026-09-22:
+     no era un trabajo tuyo. "Tatiana Storefront" (proyecto propio en
+     Hydrogen) y "Portfolio v1" también, a pedido tuyo: de los propios
+     queda solo Cherry Muse. Van primero a
      propósito: son trabajo pago para terceros, y pesan más que los proyectos
      propios a la hora de que alguien decida contratarte.
 
@@ -178,87 +183,98 @@ export const projects: readonly Project[] = [
      proyecto antes de publicar.
   --------------------------------------------------------------------- */
   {
-    title: 'Storefront B2B + B2C',
-    year: '2021 — 2024',
+    // zyn.ca (B2C) y zynwholesale.com (B2B, solo con login). La imagen es
+    // la home de zyn.ca; la del login mayorista está en zyn-wholesale.jpg.
+    title: 'ZYN — Storefront B2C + B2B',
+    year: '2021 — Hoy',
     category: 'E-commerce',
     summary:
-      'Retailer de vinos operando mayorista y minorista sobre la misma tienda.',
+      'Retailer de vinos y spirits de Calgary, Canadá, con tienda minorista y un canal mayorista privado.',
     detail:
-      'Retailer canadiense con las dos operaciones en una sola tienda. Diagnostiqué por qué el catálogo por empresa volvía vacío y construí una app de personalización de checkout con extensión de entrega.',
-    stack: ['Shopify Plus', 'Liquid', 'Remix', 'Prisma', 'GraphQL'],
-    live: null,
+      'Desarrollo las dos tiendas sobre Shopify Plus. zyn.ca es la tienda al público: miles de etiquetas, colecciones por tipo y bodega, case deals y eventos. zynwholesale.com es el canal B2B: acceso restringido con login, y cada cliente ve precios solo cuando tiene asignado el catálogo de su empresa. Diagnostiqué por qué el catálogo por empresa volvía vacío y adapté el tema mayorista al mobile con el mismo lenguaje que el minorista.',
+    stack: ['Shopify Plus', 'Liquid', 'JavaScript', 'Catálogos B2B', 'Metafields', 'GraphQL'],
+    live: 'https://zyn.ca',
     repo: null,
-    image: null,
+    image: '/images/zyn.jpg',
   },
   {
-    title: 'Portfolio de escultura',
+    // Mismo cliente que el storefront de arriba (ZYN). Stack sacado de
+    // zyn-wineries/package.json.
+    title: 'Back-office para Shopify',
+    year: '2021 — Hoy',
+    category: 'Producto',
+    summary:
+      'Web app interna donde el cliente opera su tienda Shopify sin entrar al admin.',
+    detail:
+      'Panel a medida conectado a la tienda: alta y edición de productos, bundles, órdenes de compra, actualización de costos desde Cin7 y CSV, y fulfillment por CSV que asigna el tracking a cada pedido y le avisa al comprador. Suma gestión de retiro en tienda, contenido, catálogos (tipos, medidas, presentaciones) y backups de Shopify.',
+    stack: ['React', 'Material UI', 'Node.js', 'Express', 'Prisma', 'Shopify Admin API', 'Cin7'],
+    live: null,
+    repo: null,
+    image: '/images/zyn-backoffice.jpg',
+    imageFit: 'top',
+  },
+  {
+    // Sale de tres repos de Sysgarage: zyn-checkout-customize (checkout y
+    // cuenta de cliente), zyn-picking-list y zyn-app-ats-shipment (admin).
+    title: 'Extensiones de checkout y admin',
+    year: '2024 — 2026',
+    category: 'E-commerce',
+    summary:
+      'Apps de Shopify que extienden el checkout, la cuenta de cliente y el admin de la misma tienda.',
+    detail:
+      'En el checkout, una Checkout UI Extension que suma Shipping Protection con un porcentaje configurable, y una Shopify Function que oculta métodos de envío según los productos del carrito. En la cuenta de cliente, la descarga de factura desde cada pedido. En el admin, "Print picking list" (desde la orden o en lote desde el listado) y "Generate ATS Shipment", un asistente que crea el envío con el transportista e imprime la etiqueta. Hoy las migro a Polaris web components.',
+    stack: ['Checkout UI Extensions', 'Shopify Functions', 'Admin UI Extensions', 'Remix', 'Polaris', 'Prisma'],
+    live: null,
+    repo: null,
+    // Dev Dashboard de Shopify con las tres apps. Shipping Protection y el
+    // picking list (con los datos del cliente tapados) van en la galería.
+    image: '/images/zyn-extensiones.jpg',
+    imageFit: 'top',
+  },
+  {
+    // Hecho de cero por vos: el sitio completo y el store locator.
+    // Verificado en benditoaceite.com (2026-09-22): tema Shopify con
+    // secciones propias; el locator es la sección `map_points_google` en
+    // /pages/puntos-de-venta. La imagen es una captura de la home.
+    // TODO: confirmá el año y si fue dentro de Sysgarage.
+    title: 'Bendito Aceite',
+    year: '2024',
+    category: 'E-commerce',
+    summary: 'Tienda Shopify de aceite de oliva hecha de cero, con buscador de puntos de venta.',
+    detail:
+      'Construí la tienda entera desde cero: tema a medida con secciones propias (hero en video, carruseles de productos y recetas) y el flujo de compra completo. El store locator es una sección hecha a mano sobre Google Maps: se busca por dirección o código postal y lista los locales más cercanos con su marcador en el mapa.',
+    stack: ['Shopify', 'Liquid', 'JavaScript', 'Google Maps API'],
+    live: 'https://www.benditoaceite.com',
+    repo: null,
+    image: '/images/bendito-aceite.jpg',
+  },
+  {
+    // ganly.net — WordPress con GeneratePress, bilingüe EN/ES.
+    // TODO: confirmá el año.
+    title: 'Marcela Ganly Sculpture',
     year: '2021 — 2024',
     category: 'Web',
-    summary: 'Sitio de autor para obra que estaba dispersa en archivos y redes.',
+    summary: 'Sitio de autor para una escultora en bronce.',
     detail:
-      'La obra no tenía lugar propio: vivía en carpetas y posteos sueltos. Armé el sitio completo — páginas de portfolio, colecciones, contacto y responsive.',
-    stack: ['WordPress', 'GenerateBlocks', 'CSS', 'JavaScript'],
+      'Armé el sitio completo de la artista: la obra organizada por colecciones (bronce figurativo y de forma libre, metal y resina, escultura para llevar puesta), la página de la artista, contacto por WhatsApp, versión en inglés y en español, y responsive.',
+    stack: ['WordPress', 'GeneratePress', 'GenerateBlocks', 'CSS', 'JavaScript'],
     live: 'https://ganly.net',
     repo: null,
-    image: null,
-  },
-  {
-    title: 'Sitio industrial',
-    year: '2021 — 2024',
-    category: 'Web',
-    summary: 'Rediseño de un catálogo extenso que no se entendía.',
-    detail:
-      'Un catálogo largo con una arquitectura que no acompañaba. Rediseñé la estructura de contenido y la interfaz alrededor de cómo compra el cliente, no de cómo estaba ordenado el inventario.',
-    stack: ['Diseño', 'Front-end'],
-    live: null,
-    repo: null,
-    image: null,
+    image: '/images/ganly.jpg',
   },
 
   /* ── Proyectos propios ───────────────────────────────────────────────── */
   {
-    title: 'Tatiana Storefront',
-    year: '2026',
-    category: 'E-commerce',
-    summary: 'Storefront headless de Shopify sobre Hydrogen.',
-    detail:
-      'Tienda headless completa: catálogo, colecciones, carrito, cuenta de cliente, blog y checkout de Shopify. Datos vía Storefront API con codegen tipado, animación con GSAP y scroll suave con Lenis.',
-    stack: [
-      'Shopify Hydrogen',
-      'React Router 7',
-      'TypeScript',
-      'GraphQL',
-      'Tailwind v4',
-      'GSAP',
-      'Lenis',
-    ],
-    live: null,
-    repo: null,
-    image: null,
-  },
-  {
     title: 'Cherry Muse',
     year: '2026',
-    category: 'E-commerce',
-    summary: 'Tienda con panel de administración propio, sobre Next.js y Supabase.',
+    category: 'Catálogo online',
+    summary: 'Catálogo con pedido directo por WhatsApp y panel de administración propio, sobre Next.js y Supabase.',
     detail:
-      'E-commerce de marca personal con catálogo dinámico, ficha de producto en modal, flujo de pedido y un panel admin para cargar productos. Backend con Supabase; parallax, scroll reveal y contadores animados en el frontend.',
+      'Catálogo online de marca personal, con productos cargados desde Supabase y un panel admin para gestionarlos. No tiene carrito: como cada pedido se hace por encargo y tarda 7 días, cada ficha lleva un botón "Lo quiero ya" que abre WhatsApp con el mensaje armado. Parallax, scroll reveal y contadores animados en el frontend.',
     stack: ['Next.js 16', 'React 19', 'Supabase', 'TypeScript', 'Tailwind v4', 'Lenis'],
-    live: null,
+    live: 'https://cherrymuseok.vercel.app',
     repo: null,
-    image: null,
-  },
-  {
-    title: 'Portfolio v1',
-    year: '2024',
-    category: 'Web',
-    summary: 'Primera versión del portfolio, en Astro.',
-    detail:
-      'Sitio multipágina con transiciones de vista nativas de Astro, secciones de perfil, currículum, portfolio y contacto. La base sobre la que se construyó esta versión.',
-    stack: ['Astro', 'Tailwind', 'TypeScript'],
-    live: null,
-    repo: null,
-    image: null,
+    image: '/images/cherry-muse.jpg',
   },
 ] as const;
 
@@ -307,9 +323,16 @@ export const gallery = {
   subtitle:
     'Capturas, detalles de interfaz y piezas sueltas de los proyectos en los que estuve.',
   items: [
-    {title: 'Tatiana Storefront', thumbnail: '/images/sky-hero.jpg'},
-    {title: 'Cherry Muse', thumbnail: '/images/sky-poster.jpg'},
-    {title: 'Portfolio v1', thumbnail: '/images/sky-warm.jpg'},
+    {title: 'ZYN', link: 'https://zyn.ca', thumbnail: '/images/zyn.jpg'},
+    {title: 'ZYN Back-office', thumbnail: '/images/zyn-backoffice.jpg'},
+    {title: 'Cherry Muse', link: 'https://cherrymuseok.vercel.app', thumbnail: '/images/cherry-muse.jpg'},
+    {title: 'Apps de Shopify', thumbnail: '/images/zyn-extensiones.jpg'},
+    {title: 'Print picking list', thumbnail: '/images/zyn-picking-list.jpg'},
+    {title: 'Bendito Aceite', link: 'https://www.benditoaceite.com', thumbnail: '/images/bendito-aceite.jpg'},
+    {title: 'Bendito — Puntos de venta', link: 'https://www.benditoaceite.com/pages/puntos-de-venta', thumbnail: '/images/bendito-aceite-locator.jpg'},
+    {title: 'Marcela Ganly Sculpture', link: 'https://ganly.net', thumbnail: '/images/ganly.jpg'},
+    {title: 'ZYN Wholesale', link: 'https://zynwholesale.com', thumbnail: '/images/zyn-wholesale.jpg'},
+    {title: 'Shipping Protection', thumbnail: '/images/zyn-shipping-protection.jpg'},
   ] as { title: string; link?: string; thumbnail: string }[],
 } as const;
 
@@ -334,9 +357,9 @@ export const services = [
   },
   {
     title: 'Performance',
-    lead: 'Cada milisegundo, medido.',
+    lead: 'Sitios que cargan rápido.',
     note: 'Velocidad y SEO técnico',
-    body: 'Optimización de carga, estructura de URLs, metadatos y datos estructurados. Medición continua y ajustes hasta que los números cierran.',
+    body: 'Auditorías con Lighthouse y revisión de SEO: velocidad de carga, estructura de URLs, metadatos y keywords, para que la tienda se encuentre y no haga esperar.',
     destacado: null,
   },
   /* Soporte era una sección aparte, con su propio titular grande debajo de
@@ -380,7 +403,7 @@ export const support = {
     },
     {
       title: 'Email marketing',
-      body: 'Carrito abandonado, recompra y flujos de retención que corren solos.',
+      body: 'Diseño de emails y flujos en Klaviyo: carrito abandonado, recompra y retención que corren solos.',
     },
     {
       title: 'Automatizaciones',
@@ -404,8 +427,10 @@ export const support = {
    Agregá o sacá lo que quieras — la animación se adapta a cualquier largo.
    Conviene mantener las filas parejas para que ninguna quede muy vacía.
 
-   ⚠️ Revisá la fila `ecommerce`: viene del portfolio nuevo y hay ítems que no
-   pude verificar contra tu experiencia (GA4, Shopify Functions, Klaviyo).
+   Lista confirmada por vos el 2026-09-22. Afuera a propósito: Recharge, Vue,
+   GA4, Core Web Vitals y Migraciones (no los usás). Checkout UI Extensions,
+   Functions y Admin UI Extensions están respaldados por los repos de
+   Sysgarage (zyn-checkout-customize, zyn-picking-list, zyn-app-ats-shipment).
    Borrá lo que no uses de verdad — una lista corta y cierta vale más que una
    larga y dudosa.
 --------------------------------------------------------------------------- */
@@ -417,17 +442,24 @@ export const skills = {
     'Shopify Plus',
     'Liquid',
     'Shopify CLI',
+    'Shopify APIs',
     'Hydrogen',
-    'Metafields',
+    'Oxygen',
+    'Remix',
+    'Checkout UI Extensions',
     'Shopify Functions',
-    'Checkout Extensions',
+    'Admin UI Extensions',
+    'Polaris',
+    'Metafields',
     'Catálogos B2B',
     'GraphQL',
-    'Klaviyo',
     'Webhooks',
-    'Migraciones',
-    'Core Web Vitals',
-    'GA4',
+    'Shopify Flow',
+    'Klaviyo',
+    'Lighthouse',
+    'SEO técnico',
+    'Performance Optimization',
+    'Conversion Rate Optimization',
   ],
 
   /** Fila inferior: base web, frameworks y herramientas */
@@ -437,18 +469,26 @@ export const skills = {
     'React',
     'Next.js',
     'Astro',
-    'Remix',
     'Node.js',
-    'Tailwind CSS',
+    'Express',
+    'Prisma',
+    'Supabase',
     'HTML5',
     'CSS3',
+    'Sass',
+    'Tailwind CSS',
+    'Material UI',
+    'Mobile First',
     'GSAP',
-    'Supabase',
-    'Prisma',
-    'WordPress',
+    'Figma',
+    'Git / GitHub',
+    'Asana',
+    'Jira',
+    'CI/CD con GitHub Actions',
     'Cypress',
     'Jest',
-    'Git',
+    'WordPress',
+    'IA: Claude, Codex, ChatGPT, Copilot',
   ],
 } as const;
 
@@ -479,15 +519,15 @@ export const perfil = {
   bloques: [
     {
       titulo: 'En Shopify',
-      texto: 'Construyo storefronts headless con *Hydrogen* sobre *Remix*, y cuando el proyecto pide tema nativo trabajo en *Liquid* con *metafields* y *Shopify CLI*. Sobre *Shopify Plus* extiendo el checkout con *Checkout Extensions* y *Shopify Functions*, armo *catálogos B2B* y muevo los datos con *GraphQL* y *webhooks*.',
+      texto: 'Construyo storefronts headless con *Hydrogen* sobre *Remix*, y cuando el proyecto pide tema nativo trabajo en *Liquid* con *metafields* y *Shopify CLI*. Sobre *Shopify Plus* extiendo el checkout con *Checkout UI Extensions* y *Shopify Functions*, hago apps de admin en *Remix* —imprimir picking lists, generar envíos—, armo *catálogos B2B* y muevo los datos con *GraphQL* y *webhooks*. Las interfaces de esas apps van con *Polaris*.',
     },
     {
       titulo: 'Fuera de Shopify',
-      texto: '*React* y *Next.js* para producto, *Astro* para sitios que tienen que cargar rápido, y *Node.js* con *TypeScript* de punta a punta. Persistencia con *Supabase* y *Prisma*, y las pruebas con *Jest* y *Cypress*.',
+      texto: '*React* y *Next.js* para producto, *Astro* para sitios que tienen que cargar rápido, y *Node.js* con *TypeScript* de punta a punta. Persistencia con *Supabase* y *Prisma*, y las pruebas con *Jest* y *Cypress*. También construyo *back-offices* conectados a Shopify: web apps propias donde el cliente carga productos, actualiza costos y despacha pedidos por CSV con el tracking incluido.',
     },
     {
       titulo: 'Lo que sostiene el resto',
-      texto: 'Mido con *Core Web Vitals* y *GA4* para que las decisiones tengan un número atrás, automatizo el ciclo de vida del cliente con *Klaviyo*, y hago *migraciones* cuando hay que mudar una tienda sin perder nada en el camino.',
+      texto: 'Conecto la tienda con lo que la rodea: integro APIs y apps de terceros —pagos, inventario, *Klaviyo* para email marketing— y sincronizo datos con los sistemas del cliente, como *Cin7* para costos. Y antes de publicar, reviso cada sitio con *Lighthouse* y ajusto el *SEO*.',
     },
   ],
 
@@ -518,45 +558,94 @@ export const about = {
 
 /**
  * CV descargable.
- * TODO: exportá tu CV a PDF, ponelo en public/ como cv.pdf y cambiá esto a
- * '/cv.pdf'. Mientras siga en null, el botón "Ver CV" no se renderiza —
+ * public/cv.pdf se genera desde src/pages/cv.astro con `npm run cv`, a
+ * partir de los mismos datos de este archivo: si cambiás la experiencia,
+ * volvé a correrlo. Si lo pasás a null, el botón "Descargar CV" no se
+ * renderiza —
  * preferible a un link que abre algo que no es un CV.
  */
-export const cvUrl: string | null = null;
+export const cvUrl: string | null = '/cv.pdf';
 
 /* ── Experiencia ──────────────────────────────────────────────────────── */
 export const experience = [
   {
-    role: 'Frontend Developer',
+    // Título y fechas como en LinkedIn: "Shopify Developer | Full Stack",
+    // may. 2021 — actualidad, remoto, contractor.
+    role: 'Shopify Developer · Full Stack',
     company: 'Sysgarage',
-    place: 'Miami, USA · Buenos Aires, Argentina',
-    period: '2021 — 2024',
+    place: 'Remoto · Miami, USA',
+    period: '2021 — Hoy',
     bullets: [
-      'Implementé y refiné plataformas Shopify para mejorar la experiencia de usuario y aumentar la tasa de conversión.',
-      'Integré APIs de terceros para ampliar funcionalidades: pagos, gestión de inventario y soporte al cliente.',
-      'Desarrollé estrategias de keywords y optimicé metadatos y estructura de URLs para mejorar el posicionamiento.',
-      'Optimicé la velocidad de carga de los sitios y monitoreé el rendimiento SEO con ajustes continuos.',
+      'Desarrollo las tiendas Shopify Plus de ZYN, retailer de vinos canadiense: zyn.ca (B2C) y zynwholesale.com (B2B, con acceso por login y catálogo por empresa), en Liquid y JavaScript, con enfoque mobile first.',
+      'Checkout: una Checkout UI Extension que suma Shipping Protection y una Shopify Function que personaliza los métodos de envío según el carrito. En la cuenta de cliente, la descarga de facturas por pedido.',
+      'Admin: apps en Remix con UI Extensions para imprimir picking lists (por orden o en lote) y generar envíos con el transportista, con etiqueta incluida. Hoy las migro a Polaris web components.',
+      'Back-office full stack (React, Material UI, Node.js, Express, Prisma) conectado a la tienda: productos, bundles, costos sincronizados con Cin7 y fulfillment por CSV con tracking.',
+      'Integré APIs de terceros —pagos, inventario, Klaviyo— y audito los sitios con Lighthouse para trabajar velocidad de carga y SEO técnico.',
+      // Respaldado por los repos: ramas feature/*, PRs numerados, rama
+      // staging, Dockerfile en las apps y deploy a Heroku en zyn-wineries.
+      'Cómo trabajo: contractor remoto dentro del equipo, con las tareas organizadas en Asana, ramas por feature, pull requests con code review, un ambiente de staging antes de producción y deploys con Docker y Heroku.',
     ],
   },
   {
-    role: 'Shopify Developer',
+    // LinkedIn: "Frontend Developer", nov. 2020 — abr. 2021.
+    role: 'Frontend Developer',
     company: 'Innovate Group — Shopify Experts',
     place: 'Rosario, Santa Fe, Argentina',
     period: '2020 — 2021',
+    // "Aumento notable de tráfico y conversiones" se fue: sin un número
+    // atrás no suma. Si tenés uno (ej. "+30% de conversión"), vuelve.
+    // ⚠️ Sin repos para verificar: escrito a partir de "hacía todo el front
+    // de distintas páginas". Borrá lo que no hayas hecho.
     bullets: [
-      'Creé plantillas personalizadas y dinámicas con Liquid, e implementé funcionalidades interactivas en JavaScript.',
-      'Diseñé interfaces responsive con CSS, SASS y Bootstrap.',
-      'Integré y configuré apps de terceros como Klaviyo para marketing automatizado; usé metafields para enriquecer las fichas de producto.',
-      'Contribuí a múltiples proyectos de e-commerce con aumento notable de tráfico y crecimiento en conversiones.',
+      'Hice el front completo de tiendas Shopify para distintos clientes de la agencia: home, colecciones, fichas de producto, carrito, landings de campaña y páginas institucionales.',
+      'Pasé diseños de Figma a temas en Liquid, con plantillas y secciones dinámicas que el cliente puede editar solo desde el personalizador.',
+      'Personalicé y extendí temas existentes, y mantuve las tiendas ya publicadas con cambios y ajustes a pedido.',
+      'Maqueté interfaces responsive con HTML, CSS, SASS y Bootstrap, probadas en distintos navegadores y dispositivos.',
+      'Sumé la interacción en JavaScript: menús, sliders, filtros de colección, variantes de producto y carrito.',
+      'Usé metafields para enriquecer las fichas de producto más allá de lo que trae Shopify por defecto.',
+      'Integré y configuré apps de terceros como Klaviyo para automatizar el email marketing de las tiendas.',
     ],
   },
 ] as const;
 
-export const education = {
-  title: 'Desarrollo Frontend',
-  year: '2020',
-  place: 'Buenos Aires, Argentina',
-} as const;
+// Sale de LinkedIn (linkedin.com/in/tatijael, sección Educación), 2026-09-22.
+// ⚠️ LinkedIn dice "ene. 2025 – ago. 2035" para Backend: casi seguro es
+// 2025. Corregilo también allá.
+export const education = [
+  {
+    title: 'Backend Development',
+    school: 'Ada ITW',
+    period: '2025',
+    detail: 'APIs REST con Node.js y Express, bases de datos e integración con frontends en React.',
+  },
+  {
+    title: 'Frontend Development Bootcamp',
+    school: 'Ada ITW',
+    period: '2020',
+    detail: 'HTML, CSS, SASS, JavaScript, React y Git, con proyectos en equipos Agile y Scrum.',
+  },
+  {
+    title: 'Técnica Superior en Administración Pública',
+    school: 'Instituto Terciario N° 6029',
+    period: '2011 — 2014',
+    detail: null,
+  },
+  {
+    title: 'Secundario completo',
+    school: 'Colegio Santa Catalina de Bolonia · Tartagal, Salta',
+    // TODO: año de egreso, si querés mostrarlo.
+    period: null,
+    detail: null,
+  },
+] as const;
+
+/* ── Idiomas ───────────────────────────────────────────────────────────
+   Van debajo de Formación y también en el CV. B1 es lo que declaraste vos
+   (2026-09-22); si rendís un examen o subís de nivel, cambialo acá. */
+export const languages = [
+  { label: 'Español', level: 'Nativo' },
+  { label: 'Inglés', level: 'Intermedio (B1)' },
+] as const;
 
 /* ── Contacto ─────────────────────────────────────────────────────────── */
 export const contact = {

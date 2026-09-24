@@ -17,18 +17,34 @@ import { nav, site } from '../data/site';
       <span aria-hidden="true" data-logo-mark>{site.logoMark}</span>
     </a>
 
+    {/* Los links sueltos, desde `lg`. Contacto no entra en la tira: el
+        botón "Trabajemos juntos" está pegado a la derecha y apunta al mismo
+        ancla, así que repetirlo a 20px de distancia es ruido. En el panel
+        del teléfono sí está, porque ahí el botón no se ve. */}
+    <ul class="nav-tira hidden lg:flex" role="list">
+      {
+        nav
+          .filter((item) => item.href !== '#contacto')
+          .map((item) => (
+            <li>
+              <a href={item.href} class="nav-link">
+                {item.label}
+              </a>
+            </li>
+          ))
+      }
+    </ul>
+
     <div class="flex items-center gap-2">
       <a href="#contacto" class="air-btn-ghost air-btn-ghost--on-sky hidden sm:inline-flex">
         Trabajemos juntos
       </a>
 
-      {/* Un solo botón para las ocho secciones, en todos los tamaños. La
-          tira horizontal se fue: ocho ítems a 16px de aire no se leían como
-          opciones, se leían como una tira de texto, y en 1024px apretaban
-          contra el logo. */}
+      {/* Solo debajo de `lg`: en pantallas grandes la tira de al lado ya
+          hace de menú y el botón sería un segundo camino a lo mismo. */}
       <button
         type="button"
-        class="air-btn-ghost air-btn-ghost--on-sky nav-menu"
+        class="air-btn-ghost air-btn-ghost--on-sky nav-menu lg:hidden"
         aria-expanded="false"
         aria-controls="nav-mobile"
         data-nav-toggle
@@ -56,7 +72,7 @@ import { nav, site } from '../data/site';
     </div>
   </nav>
 
-  {/* El menú, para todos los tamaños. En dos columnas desde tablet: ocho
+  {/* El menú de pantalla chica. En dos columnas desde tablet: ocho
       entradas en una sola columna obligan a recorrer una lista larga, y en
       dos se abarcan de un vistazo. El orden se lee por COLUMNA —las cuatro
       primeras a la izquierda— que es como está escrito en el DOM y como lo
@@ -98,13 +114,46 @@ import { nav, site } from '../data/site';
     visibility: hidden;
   }
 
+  /* ── La tira de links ──────────────────────────────────────────────────
+     Siete links con 28px entre sí y no 16px: con poco aire se leían como
+     una frase y no como opciones separadas. El subrayado que crece desde
+     el centro marca el hover sin mover nada de lugar. */
+  .nav-tira {
+    align-items: center;
+    gap: 28px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
   .nav-link {
+    position: relative;
+    display: inline-block;
+    padding: 6px 0;
+    font-size: 14px;
+    font-weight: var(--font-weight-medium);
     color: rgb(var(--tinta-rgb) / 0.72);
     text-decoration: none;
+    white-space: nowrap;
     transition: color 200ms ease;
   }
-  .nav-link:hover {
+  .nav-link::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 1px;
+    background-color: currentColor;
+    transform: scaleX(0);
+    transition: transform 200ms ease;
+  }
+  .nav-link:hover,
+  .nav-link:focus-visible {
     color: var(--color-ink);
+  }
+  .nav-link:hover::after,
+  .nav-link:focus-visible::after {
+    transform: scaleX(1);
   }
 
   /* Casi opaca y no translúcida: con menos opacidad el desenfoque arrastra
@@ -210,6 +259,7 @@ import { nav, site } from '../data/site';
   }
 
   @media (prefers-reduced-motion: reduce) {
+    .nav-link::after,
     .nav-panel__link,
     .nav-panel__num {
       transition: none;

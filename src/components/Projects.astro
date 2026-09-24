@@ -92,7 +92,7 @@ const fallbacks = [
                 )}
               </div>
 
-              <div class="pila__medio">
+              <div class:list={['pila__medio', p.imageFit === 'contain' && 'pila__medio--entera', p.imageFit === 'top' && 'pila__medio--arriba']}>
                 <img
                   src={p.image ?? fallbacks[i % fallbacks.length]}
                   alt=""
@@ -214,6 +214,19 @@ const fallbacks = [
     width: 100%;
     height: 100%;
     object-fit: cover;
+  }
+  /* Para capturas de UI chicas o con proporción rara (un bloque del
+     checkout, un modal): se ven enteras sobre blanco en vez de recortadas. */
+  .pila__medio--entera {
+    background: #ffffff;
+    box-shadow: inset 0 0 0 1px rgb(var(--tinta-rgb) / 0.08);
+  }
+  .pila__medio--arriba img {
+    object-position: top left;
+  }
+  .pila__medio--entera img {
+    object-fit: contain;
+    padding: 6%;
   }
 
   /* ── El techo de alto en pantallas angostas ──────────────────────────

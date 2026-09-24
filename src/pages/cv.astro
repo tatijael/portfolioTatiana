@@ -1,0 +1,241 @@
+---
+/* CV imprimible. No es una página para navegar: es la fuente de
+   public/cv.pdf, que `npm run cv` imprime con Chrome headless. Lee los
+   mismos datos que el portfolio, así que el CV nunca dice algo distinto
+   del sitio.
+
+   Una sola columna y texto plano a propósito: los ATS (los filtros
+   automáticos de los reclutadores) leen mal las columnas y los íconos. */
+import '@fontsource-variable/inter';
+import {
+  education,
+  experience,
+  languages,
+  projects,
+  site,
+  skills,
+  socials,
+} from '../data/site';
+
+const linkedin = socials.find((s) => s.label === 'LinkedIn')?.href;
+const github = socials.find((s) => s.label === 'GitHub')?.href;
+const sinProtocolo = (u?: string) => u?.replace(/^https?:\/\/(www\.)?/, '');
+
+// Solo el trabajo para clientes: los proyectos propios ya están en el sitio.
+const destacados = projects.filter((p) =>
+  ['ZYN — Storefront B2C + B2B', 'Extensiones de checkout y admin', 'Back-office para Shopify', 'Bendito Aceite'].includes(
+    p.title,
+  ),
+);
+---
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <title>{site.name} — CV</title>
+  </head>
+  <body>
+    <main class="cv">
+      <header>
+        <h1>{site.name}</h1>
+        <p class="rol">{site.role}</p>
+        <p class="contacto">
+          {site.location} · <a href={`mailto:${site.email}`}>{site.email}</a>
+          {linkedin && <> · <a href={linkedin}>{sinProtocolo(linkedin)}</a></>}
+          {github && <> · <a href={github}>{sinProtocolo(github)}</a></>}
+          {' · '}<a href={site.url}>{sinProtocolo(site.url)}</a>
+        </p>
+        <p class="resumen">{site.description}</p>
+      </header>
+
+      <section>
+        <h2>Experiencia</h2>
+        {
+          experience.map((job) => (
+            <article class="bloque">
+              <div class="cabecera">
+                <h3>
+                  {job.role} <span class="empresa">· {job.company}</span>
+                </h3>
+                <span class="meta">{job.period}</span>
+              </div>
+              <p class="meta">{job.place}</p>
+              <ul>
+                {job.bullets.map((b) => (
+                  <li>{b}</li>
+                ))}
+              </ul>
+            </article>
+          ))
+        }
+      </section>
+
+      <section>
+        <h2>Proyectos destacados</h2>
+        {
+          destacados.map((p) => (
+            <article class="bloque">
+              <div class="cabecera">
+                <h3>{p.title}</h3>
+                <span class="meta">{p.year}</span>
+              </div>
+              <p>{p.detail}</p>
+              <p class="meta">{p.stack.join(' · ')}</p>
+            </article>
+          ))
+        }
+      </section>
+
+      <section>
+        <h2>Stack</h2>
+        <p><strong>Shopify y e-commerce:</strong> {skills.ecommerce.join(', ')}.</p>
+        <p><strong>Web y herramientas:</strong> {skills.web.join(', ')}.</p>
+      </section>
+
+      <section class="dos">
+        <div>
+          <h2>Formación</h2>
+          {
+            education.map((ed) => (
+              <div class="bloque chico">
+                <h3>{ed.title}</h3>
+                <p class="meta">
+                  {ed.school}
+                  {ed.period && ` · ${ed.period}`}
+                </p>
+              </div>
+            ))
+          }
+        </div>
+        <div>
+          <h2>Idiomas</h2>
+          {
+            languages.map((l) => (
+              <div class="bloque chico">
+                <h3>{l.label}</h3>
+                <p class="meta">{l.level}</p>
+              </div>
+            ))
+          }
+        </div>
+      </section>
+    </main>
+  </body>
+</html>
+
+<style is:global>
+  /* Tinta y azul del Sistema 1A; el coral no entra: en papel y en texto
+     chico no pasa contraste. */
+  :root {
+    --tinta: #1f2a3a;
+    --azul: #3c5a7d;
+    --gris: #5d6878;
+    --linea: #dbe8f4;
+  }
+  @page {
+    size: A4;
+    margin: 16mm 16mm 14mm;
+  }
+  * {
+    box-sizing: border-box;
+    margin: 0;
+  }
+  body {
+    background: #ffffff;
+    color: var(--tinta);
+    font: 400 10pt / 1.45 'Inter Variable', system-ui, sans-serif;
+  }
+  .cv {
+    max-width: 180mm;
+    margin: 0 auto;
+    padding: 24px 16px;
+  }
+  @media print {
+    .cv {
+      padding: 0;
+    }
+  }
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+  h1 {
+    font-size: 22pt;
+    font-weight: 650;
+    letter-spacing: -0.01em;
+    line-height: 1.1;
+  }
+  .rol {
+    margin-top: 2pt;
+    font-size: 11.5pt;
+    font-weight: 500;
+    color: var(--azul);
+  }
+  .contacto {
+    margin-top: 6pt;
+    font-size: 9pt;
+    color: var(--gris);
+  }
+  .resumen {
+    margin-top: 8pt;
+  }
+  section {
+    margin-top: 14pt;
+  }
+  h2 {
+    font-size: 8.5pt;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--azul);
+    padding-bottom: 3pt;
+    border-bottom: 1px solid var(--linea);
+    margin-bottom: 7pt;
+  }
+  h3 {
+    font-size: 10.5pt;
+    font-weight: 600;
+  }
+  .empresa {
+    font-weight: 400;
+  }
+  .bloque {
+    margin-bottom: 9pt;
+    break-inside: avoid;
+  }
+  .bloque.chico {
+    margin-bottom: 6pt;
+  }
+  .cabecera {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 12pt;
+  }
+  .meta {
+    font-size: 9pt;
+    color: var(--gris);
+    white-space: normal;
+  }
+  .cabecera .meta {
+    white-space: nowrap;
+  }
+  ul {
+    margin-top: 4pt;
+    padding-left: 13pt;
+  }
+  li {
+    margin-bottom: 2.5pt;
+  }
+  section > p + p {
+    margin-top: 4pt;
+  }
+  .dos {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 18pt;
+  }
+</style>

@@ -1,5 +1,5 @@
 ---
-import { education, experience } from '../data/site';
+import { cvUrl, education, experience, languages } from '../data/site';
 ---
 
 <section
@@ -9,7 +9,20 @@ import { education, experience } from '../data/site';
   <div class="air-container flex flex-col gap-[var(--section-gap)]">
     {/* ── Experiencia ── */}
     <div class="flex flex-col gap-8">
-      <h3 class="air-reveal air-eyebrow">Experiencia</h3>
+      <div class="air-reveal flex flex-wrap items-center justify-between gap-4">
+        <h3 class="air-eyebrow">Experiencia</h3>
+        {
+          cvUrl && (
+            <a
+              href={cvUrl}
+              class="air-btn-ghost px-5 py-2.5"
+              download="Tatiana-Saucedo-CV.pdf"
+            >
+              Descargar CV
+            </a>
+          )
+        }
+      </div>
 
       <ol class="flex flex-col gap-6">
         {
@@ -37,14 +50,33 @@ import { education, experience } from '../data/site';
         }
 
         <li class="air-reveal air-card air-card--haze grid gap-4 md:grid-cols-[220px_1fr] md:gap-8">
-          <div class="flex flex-col gap-1">
-            <p class="type-xl-3 text-ink">Formación</p>
-            <p class="text-caption font-normal text-ink/70">{education.year}</p>
-          </div>
-          <div class="flex flex-col gap-1">
-            <p class="text-body font-medium text-ink">{education.title}</p>
-            <p class="text-caption font-normal text-ink/70">{education.place}</p>
-          </div>
+          <p class="type-xl-3 text-ink">Formación</p>
+          <ul class="flex flex-col gap-4">
+            {education.map((ed) => (
+              <li class="flex flex-col gap-1">
+                <p class="text-body font-medium text-ink">{ed.title}</p>
+                <p class="text-caption font-medium text-rosewood">{ed.school}</p>
+                {ed.period && (
+                  <p class="text-caption font-normal text-ink/70">{ed.period}</p>
+                )}
+                {ed.detail && (
+                  <p class="text-caption font-normal text-ink/75">{ed.detail}</p>
+                )}
+              </li>
+            ))}
+          </ul>
+        </li>
+
+        <li class="air-reveal air-card air-card--haze grid gap-4 md:grid-cols-[220px_1fr] md:gap-8">
+          <p class="type-xl-3 text-ink">Idiomas</p>
+          <ul class="flex flex-col gap-2">
+            {languages.map((l) => (
+              <li class="flex flex-wrap items-baseline gap-x-3">
+                <span class="text-body font-medium text-ink">{l.label}</span>
+                <span class="text-caption font-normal text-ink/70">{l.level}</span>
+              </li>
+            ))}
+          </ul>
         </li>
       </ol>
     </div>
