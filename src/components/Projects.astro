@@ -77,7 +77,16 @@ const fallbacks = [
                 </p>
 
                 <h3 class="pila__titulo">{p.title}</h3>
-                <p class="pila__detalle">{p.detail}</p>
+                <p class="pila__detalle" id={`pila-detalle-${i}`}>{p.detail}</p>
+                <button
+                  type="button"
+                  class="pila__mas"
+                  aria-expanded="false"
+                  aria-controls={`pila-detalle-${i}`}
+                  hidden
+                >
+                  Ver más
+                </button>
 
                 <ul class="pila__stack">
                   {p.stack.map((t) => (
@@ -229,16 +238,80 @@ const fallbacks = [
     padding: 6%;
   }
 
-  /* ── El techo de alto en pantallas angostas ──────────────────────────
-     Apilada en una columna, la tarjeta suma texto MÁS imagen, y si termina
-     más alta que el espacio libre bajo la nav se clava con el pie afuera de
-     la pantalla: mientras está pegada nunca llegás a ver su final. Con el
-     recorte de alto sobre la imagen —que igual va `object-fit: cover`, o sea
-     que no se deforma— la tarjeta entra entera en cualquier teléfono. */
+  /* ── Pantallas angostas: la tarjeta tiene que entrar entera ──────────
+     En una columna la tarjeta suma texto MÁS imagen, y si termina más alta
+     que el espacio bajo la nav se clava con el pie afuera: la siguiente la
+     tapa antes de que llegues a leerla. Recortar solo la imagen no alcanzó
+     —con textos largos como el del back-office igual no entraba—, así que
+     también se acortan el texto (2 líneas y "Ver más") y las tecnologías
+     (una sola fila que se desliza). */
+  .pila__mas {
+    display: none;
+  }
   @media (max-width: 899px) {
     .pila__medio {
       aspect-ratio: 16 / 9;
-      max-height: 32svh;
+      max-height: 28svh;
+    }
+
+    .pila__detalle {
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
+      line-clamp: 2;
+      overflow: hidden;
+      margin-bottom: 0.5rem;
+    }
+    .pila__mas:not([hidden]) {
+      display: inline-block;
+      margin: 0 0 1.25rem;
+      padding: 0.25rem 0;
+      border: 0;
+      background: none;
+      font: inherit;
+      font-size: var(--text-caption);
+      font-weight: var(--font-weight-medium);
+      color: var(--color-rosewood);
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      cursor: pointer;
+    }
+
+    /* Sin esto, la fila de tecnologías sin corte le impone su ancho entero
+       a la columna y la tarjeta se sale de la pantalla por la derecha. */
+    .pila__cuerpo {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .pila__stack {
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .pila__stack > li {
+      flex: none;
+    }
+
+    /* Abierta, la tarjeta deja la pila: pasa a scrollear como un bloque
+       normal para que se pueda leer hasta el final, y la siguiente se le
+       apila encima recién cuando termina de pasar. `relative` y no
+       `static` para conservar el z-index: si no, las cartas clavadas de
+       atrás se le pintarían encima. */
+    .pila__carta[data-abierta] {
+      position: relative;
+    }
+    .pila__carta[data-abierta] .pila__detalle {
+      display: block;
+      overflow: visible;
+    }
+    .pila__carta[data-abierta] .pila__stack {
+      flex-wrap: wrap;
+    }
+  }
+  /* Teléfonos bajos (iPhone SE y similares): cada escalón de la pila come
+     12px más, y las últimas tarjetas se pasaban por unos 20px. */
+  @media (max-width: 899px) and (max-height: 700px) {
+    .pila__medio {
+      max-height: 22svh;
     }
   }
 
@@ -252,3 +325,36 @@ const fallbacks = [
     }
   }
 </style>
+
+<script>
+  // "Ver más" solo aparece si el texto de verdad quedó cortado: con una
+  // descripción corta el botón no tendría nada que mostrar.
+  const botones = document.querySelectorAll<HTMLButtonElement>('.pila__mas');
+
+  const revisar = () => {
+    botones.forEach((boton) => {
+      const carta = boton.closest<HTMLElement>('.pila__carta')!;
+      if (carta.hasAttribute('data-abierta')) return;
+      const detalle = carta.querySelector<HTMLElement>('.pila__detalle')!;
+      boton.hidden = detalle.scrollHeight <= detalle.clientHeight + 1;
+    });
+  };
+
+  botones.forEach((boton) => {
+    boton.addEventListener('click', () => {
+      const carta = boton.closest<HTMLElement>('.pila__carta')!;
+      const abrir = !carta.hasAttribute('data-abierta');
+      // Abrir la saca de `sticky`: la tarjeta volvería a su lugar en el flujo
+      // y pegaría un salto. Se compensa el scroll para que quede donde
+      // estaba en el momento del toque.
+      const antes = carta.getBoundingClientRect().top;
+      carta.toggleAttribute('data-abierta', abrir);
+      window.scrollBy(0, carta.getBoundingClientRect().top - antes);
+      boton.setAttribute('aria-expanded', String(abrir));
+      boton.textContent = abrir ? 'Ver menos' : 'Ver más';
+    });
+  });
+
+  revisar();
+  addEventListener('resize', revisar, { passive: true });
+</script>

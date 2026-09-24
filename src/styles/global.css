@@ -1399,21 +1399,12 @@ html[data-tema='noche'] {
   }
 }
 
-/* Las dos versiones de la galería salen del servidor (HeroParallax.tsx) y
-   esto elige cuál se ve, sin esperar a que hidrate React. La tarjeta de
-   Showcase llega derecha en táctil por la misma razón: el SSR la pinta
-   inclinada y, sin esto, se enderezaría de golpe al hidratar. */
+/* La tarjeta de Showcase llega derecha en táctil desde el CSS, no desde
+   React: el SSR la pinta inclinada y, sin esto, se enderezaría de golpe al
+   hidratar. (La galería también tenía una versión táctil propia; se volvió
+   a las tres filas originales porque el diseño gustaba más.) */
 @layer utilities {
-  .solo-tactil {
-    display: none;
-  }
   @media (hover: none) and (pointer: coarse) {
-    .solo-tactil {
-      display: block;
-    }
-    .sin-tactil {
-      display: none;
-    }
     .showcase-quieta {
       transform: none !important;
       will-change: auto !important;

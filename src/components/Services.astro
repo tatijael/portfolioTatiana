@@ -174,6 +174,14 @@ import SectionHeader from './ui/SectionHeader.astro';
          parece una tarjeta suelta y nadie desliza. */
       margin-inline: calc(var(--spacing-24, 1.5rem) * -1);
       padding-inline: var(--spacing-24, 1.5rem);
+      /* Un carril con scroll recorta todo lo que se sale, y dos cosas se
+         salían por abajo: el borde de la tarjeta, que es un box-shadow por
+         FUERA de la caja, y las tarjetas todavía sin revelar (las de la
+         derecha esperan con su translateY de entrada). Sin este aire el
+         carril se comía el borde inferior y se podía mover en vertical. */
+      padding-bottom: var(--spacing-24, 1.5rem);
+      margin-bottom: calc(var(--spacing-24, 1.5rem) * -1);
+      overflow-y: hidden;
       scrollbar-width: none;
     }
     .servicios::-webkit-scrollbar {
