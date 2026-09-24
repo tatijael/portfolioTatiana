@@ -1,0 +1,249 @@
+---
+import '../styles/global.css';
+import { site } from '../data/site';
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const { title = `${site.name} — ${site.role}`, description = site.description } =
+  Astro.props;
+
+const canonical = new URL(Astro.url.pathname, Astro.site ?? site.url).toString();
+---
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta name="author" content={site.name} />
+    <!-- Coincide con el arranque del lienzo: la barra del navegador se
+         funde con la primera parada del degradado, que es donde apoya el
+         hero. El valor es el del tema por defecto; si hay otro guardado, el
+         script de abajo lo corrige antes del primer paint. -->
+    <meta name="theme-color" content="#fffdfb" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:locale" content="es_AR" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+
+    <!-- Marca la página como "con JS" antes del primer paint, para que las
+         animaciones de reveal no provoquen un flash de contenido visible.
+
+         `wordmark-activo` va acá y no en el script del componente por una
+         razón de timing: mientras la pieza de apertura está en pantalla, el
+         logo de la nav tiene que estar oculto, y la nav se renderiza antes
+         de que corra cualquier script de componente. Puesto acá, la clase ya
+         existe cuando el navegador pinta la nav por primera vez y no hay un
+         frame con dos "Tati" a la vez.
+
+         Si el usuario pidió menos movimiento la pieza no existe, así que la
+         clase tampoco: el logo de la nav se comporta como siempre. El script
+         del componente también la saca si por cualquier motivo no puede
+         montar la pieza. -->
+    <!-- ── El tema, antes del primer paint ────────────────────────────
+         Este script tiene que ser `is:inline` y estar acá arriba, y las dos
+         cosas por el mismo motivo: si el tema se aplicara desde un módulo
+         —que se carga diferido— el navegador ya habría pintado una pantalla
+         clara, y quien eligió "noche" vería un fogonazo blanco en cada
+         carga. Puesto acá, el atributo existe antes de que haya un solo
+         píxel en pantalla.
+
+         Por eso también la clave está escrita a mano y no importada: un
+         `import` convertiría esto en un módulo y perdería el `is:inline`.
+         Si cambia `TEMA_CLAVE` en site.ts, hay que cambiarla acá. -->
+    <script is:inline>
+      try {
+        var t = localStorage.getItem('tati:tema');
+        if (t) document.documentElement.dataset.tema = t;
+      } catch (e) {
+        // Storage bloqueado: se queda en el tema por defecto.
+      }
+    </script>
+
+    <script is:inline>
+      document.documentElement.classList.add('js');
+      if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        document.documentElement.classList.add('wordmark-activo');
+      }
+    </script>
+
+    <script
+      is:inline
+      type="application/ld+json"
+      set:html={JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'Person',
+        name: site.name,
+        jobTitle: site.role,
+        email: `mailto:${site.email}`,
+        url: site.url,
+        address: {
+          '@type': 'PostalAddress',
+          addressLocality: 'Buenos Aires',
+          addressCountry: 'AR',
+        },
+        sameAs: [
+          'https://www.linkedin.com/in/tatijael/',
+          'https://github.com/tatijael',
+        ],
+      })}
+    />
+  </head>
+
+  <body>
+    <a
+      href="#contenido"
+      class="air-btn-light sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50"
+    >
+      Saltar al contenido
+    </a>
+    <slot />
+
+    <script>
+      import Lenis from 'lenis';
+
+      // ── Scroll suave (Lenis) ──────────────────────────────────────────
+      // Inercia en la rueda: el scroll sigue moviéndose un instante después
+      // de soltar en vez de frenar en seco. Es mejora progresiva — sin JS, o
+      // con `prefers-reduced-motion`, queda el scroll nativo y el
+      // `scroll-behavior: smooth` del CSS, que hace el mismo trabajo peor.
+      //
+      // Lenis mueve el scroll real de la ventana (no un contenedor propio),
+      // así que el parallax de más abajo sigue recibiendo eventos `scroll`
+      // normales: no hay que conectarlos a mano.
+      const quietScroll = window.matchMedia(
+        '(prefers-reduced-motion: reduce)'
+      ).matches;
+
+      let lenis: Lenis | null = null;
+
+      if (!quietScroll) {
+        lenis = new Lenis({ duration: 1.05, smoothWheel: true });
+
+        // La clase apaga el scroll-behavior del CSS: con los dos activos el
+        // navegador y Lenis interpolan a la vez y el scroll da saltos.
+        document.documentElement.classList.add('lenis');
+
+        const raf = (time: number) => {
+          lenis!.raf(time);
+          requestAnimationFrame(raf);
+        };
+        requestAnimationFrame(raf);
+      }
+
+      // Los saltos a #ancla pasan por Lenis para que también tengan inercia, y
+      // descuentan la nav fija — el trabajo que hacía `scroll-padding-top`,
+      // que Lenis no lee.
+      const navHeight =
+        parseInt(
+          getComputedStyle(document.documentElement).getPropertyValue(
+            '--nav-height'
+          )
+        ) || 72;
+
+      document.addEventListener('click', (event) => {
+        if (!lenis) return;
+        const link = (event.target as HTMLElement).closest<HTMLAnchorElement>(
+          'a[href^="#"]'
+        );
+        if (!link) return;
+
+        const id = link.getAttribute('href')!.slice(1);
+        const target = id && document.getElementById(id);
+        if (!target) return;
+
+        event.preventDefault();
+        lenis.scrollTo(target, { offset: -navHeight });
+        history.pushState(null, '', `#${id}`);
+      });
+
+      // ── Parallax ──────────────────────────────────────────────────────
+      // Un solo rAF para todas las capas. Se mueve `transform` vía una
+      // custom property, no `background-position`: así el trabajo queda en
+      // el compositor y no repinta en cada frame.
+      const parallaxOff = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const layers = Array.from(
+        document.querySelectorAll<HTMLElement>('[data-parallax]')
+      ).map((el) => ({ el, speed: parseFloat(el.dataset.parallax ?? '0.1') }));
+
+      if (!parallaxOff && layers.length) {
+        let ticking = false;
+        const update = () => {
+          ticking = false;
+          const vh = window.innerHeight;
+          for (const { el, speed } of layers) {
+            const r = el.getBoundingClientRect();
+            // Chequeo de visibilidad directo en vez de IntersectionObserver:
+            // con un puñado de capas cuesta menos que un observer, y no
+            // depende de que el navegador entregue callbacks de IO (Chrome
+            // los frena en pestañas de fondo, y ahí el parallax quedaba mudo).
+            if (r.bottom < 0 || r.top > vh) continue;
+            // -1 cuando la sección entra por abajo, +1 cuando sale por arriba
+            const progress = (r.top + r.height / 2 - vh / 2) / (vh / 2 + r.height / 2);
+            el.style.setProperty(
+              '--parallax',
+              `${(-progress * r.height * speed).toFixed(1)}px`
+            );
+          }
+        };
+        const onScroll = () => {
+          if (ticking) return;
+          ticking = true;
+          requestAnimationFrame(update);
+        };
+        addEventListener('scroll', onScroll, { passive: true });
+        addEventListener('resize', onScroll, { passive: true });
+        update();
+      }
+
+      // ── Reveal on scroll ──────────────────────────────────────────────
+      // Sin JS, el CSS deja todo visible por defecto.
+      const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const targets = document.querySelectorAll<HTMLElement>('.air-reveal');
+
+      if (reduced || !('IntersectionObserver' in window)) {
+        targets.forEach((el) => el.classList.add('is-visible'));
+      } else {
+        // Cascada por sección: dentro de cada una, cada bloque entra 80ms
+        // después del anterior (hasta 320ms). Es lo que hace que una sección
+        // se arme de a poco en vez de aparecer entera de golpe.
+        document
+          .querySelectorAll<HTMLElement>('main section, footer')
+          .forEach((section) => {
+            section
+              .querySelectorAll<HTMLElement>('.air-reveal')
+              .forEach((el, i) => {
+                el.style.setProperty('--reveal-delay', `${Math.min(i, 4) * 80}ms`);
+              });
+          });
+
+        const io = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              if (!entry.isIntersecting) return;
+              entry.target.classList.add('is-visible');
+              io.unobserve(entry.target);
+            });
+          },
+          { rootMargin: '0px 0px -4% 0px', threshold: 0.05 }
+        );
+        targets.forEach((el) => io.observe(el));
+      }
+    </script>
+  </body>
+</html>

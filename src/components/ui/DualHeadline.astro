@@ -1,0 +1,34 @@
+---
+/**
+ * Dual-Style Headline — el gesto tipográfico central de Air.
+ * Una sola palabra en Control Cursive itálica contra el resto upright.
+ * Nunca más de una palabra en cursiva por headline.
+ *
+ * No fija color: hereda del contenedor, para que el mismo componente sirva
+ * sobre cielo (Whiteout) y sobre superficie clara (Ink).
+ */
+interface Props {
+  before?: string;
+  cursive: string;
+  after?: string;
+  /** Etiqueta semántica: h1 para el hero, h2 para el resto */
+  as?: 'h1' | 'h2' | 'h3';
+  size?: 'lg' | 'md';
+  class?: string;
+}
+
+const {
+  before = '',
+  cursive,
+  after = '',
+  as: Tag = 'h2',
+  size = 'lg',
+  class: className = '',
+}: Props = Astro.props;
+
+const sizeClass = size === 'lg' ? 'text-heading-lg-fluid' : 'text-heading-fluid';
+---
+
+<Tag class={`font-control-tnt font-medium text-balance ${sizeClass} ${className}`}>
+  {before}{before ? ' ' : ''}<span class="air-cursive">{cursive}</span>{after}
+</Tag>

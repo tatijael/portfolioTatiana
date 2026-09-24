@@ -1,0 +1,16 @@
+---
+import { gallery } from '../data/site';
+import { HeroParallax } from './react/HeroParallax.tsx';
+---
+
+<section id="galeria">
+  <HeroParallax items={gallery.items} subtitle={gallery.subtitle} client:idle>
+    <div slot="title" class="flex flex-col gap-3">
+      <p class="air-eyebrow">{gallery.eyebrow}</p>
+      <h2 class="font-control-tnt text-heading-lg-fluid font-medium text-balance text-ink">
+        {gallery.title}{' '}<span class="air-cursive">{gallery.cursive}</span
+        >{gallery.after}
+      </h2>
+    </div>
+  </HeroParallax>
+</section>

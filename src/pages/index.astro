@@ -1,0 +1,79 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { site, hero } from '../data/site';
+import Nav from '../components/Nav.astro';
+import Wordmark from '../components/Wordmark.astro';
+import TemaSwitch from '../components/TemaSwitch.astro';
+import Perfil from '../components/Perfil.astro';
+import Projects from '../components/Projects.astro';
+import Stack from '../components/Stack.astro';
+import About from '../components/About.astro';
+import Services from '../components/Services.astro';
+import Showcase from '../components/Showcase.astro';
+import Gallery from '../components/Gallery.astro';
+import Contact from '../components/Contact.astro';
+---
+
+<Layout>
+  <Nav />
+  <TemaSwitch />
+  {/* Fuera de <main> a propósito: es una pieza decorativa de apertura, no
+      contenido. Así el skip link salta directo a lo que se lee. */}
+  <Wordmark />
+
+  {/* ── El orden de las secciones ────────────────────────────────────────
+      No es el orden en que se fueron construyendo: es el recorrido de quien
+      lee, que va de "qué hacés" a "escribime" y no puede saltearse ningún
+      escalón.
+
+        apertura     quién sos — nombre, rol y las dos acciones
+        Lo que hago  qué hacés, con nombres propios
+        ── la prueba ──
+        Proyectos    los casos. Va temprano a propósito: la evidencia
+                     primero, la promesa después
+        Stack        con qué los construiste, mientras están frescos
+        Galería      los fragmentos de esos mismos proyectos
+        ── la persona ──
+        Sobre mí     recién acá. La bio arriba volvería el sitio sobre vos
+                     en vez de sobre el problema de quien lee
+        Experiencia  la trayectoria que respalda lo anterior
+        ── el cierre ──
+        Servicios    la oferta, pegada al final: es el último paso antes
+                     de la acción, y nada tiene que enfriarlo
+        Contacto     la acción, y el final de la página
+
+      Sin pie: la página termina en Contacto a propósito. Un pie con un menú
+      repetido y un copyright, después de haber pedido que te escriban, es
+      ruido en el peor momento — justo cuando alguien terminó de leer y tiene
+      que decidir.
+
+      `nav` en site.ts sigue este mismo orden. Si movés una sección acá,
+      movela también allá o el menú deja de describir la página. */}
+  <main id="contenido">
+    {/* ── El h1 de la página, solo para lectores ─────────────────────────
+        El hero se fue porque repetía la presentación que ya hace la
+        pantalla de apertura, y con él se fue el único <h1> visible.
+
+        No se puede ascender a h1 el nombre de la apertura: está marcado
+        `aria-hidden` —el nombre accesible lo da el logo de la nav— y además
+        vive en una capa que pasa a `visibility: hidden` cuando el nombre
+        aterriza, o sea que el encabezado desaparecería del árbol de
+        accesibilidad apenas scrolleás. Un h1 que existe medio segundo no es
+        un h1.
+
+        Así que va acá, invisible pero siempre presente. Es el patrón
+        correcto cuando el título visible de una página está resuelto como
+        imagen o como texto decorativo, que es exactamente el caso: el
+        nombre es un degradado recortado contra la letra. */}
+    <h1 class="sr-only">{site.name} — {hero.wordmarkRole}</h1>
+
+    <Perfil />
+    <Projects />
+    <Stack />
+    <Gallery />
+    <Showcase />
+    <About />
+    <Services />
+    <Contact />
+  </main>
+</Layout>

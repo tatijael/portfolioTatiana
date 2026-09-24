@@ -1,0 +1,95 @@
+---
+import { contact, cvUrl, site, socials } from '../data/site';
+import DualHeadline from './ui/DualHeadline.astro';
+
+/**
+ * Contacto — una sola tarjeta con el mensaje a la izquierda y las acciones
+ * directas apiladas a la derecha.
+ *
+ * Antes había un formulario de cuatro campos. Sin endpoint configurado
+ * terminaba abriendo el cliente de mail igual, o sea: cuatro campos para
+ * hacer lo mismo que hace un mailto, con más fricción y más chance de que
+ * alguien lo abandone a la mitad. Las acciones directas son un click.
+ *
+ * El orden es jerárquico: mail primero (relleno claro, el elemento más
+ * brillante de la sección, como manda el CTA primario de Air), el resto en
+ * ghost. Los links salen de `socials` y de `site.email` en site.ts — no hay
+ * ninguno escrito a mano acá.
+ */
+/* Los que no van como botón en esta sección.
+   GitHub salió por pedido y de momento: el filtro es local a Contacto a
+   propósito, así sigue estando en el pie y en "Sobre mí", que es donde un
+   link al perfil no compite con nada. Acá sí competía: estos tres botones
+   son la llamada a la acción de la página, y el tercero desviaba a alguien
+   que ya estaba por escribir.
+   Para que vuelva, vaciá el array. */
+const ocultosEnContacto: string[] = ['GitHub'];
+
+const links = socials.filter(
+  (s) => !s.href.startsWith('mailto:') && !ocultosEnContacto.includes(s.label),
+);
+---
+
+<section
+  id="contacto"
+  class="air-bleed air-dots py-[var(--section-pad)] md:py-[var(--section-pad-lg)]"
+  data-parallax="0.04"
+>
+  <div class="air-container">
+    <div
+      class="air-reveal air-card-glass grid items-center gap-10 md:grid-cols-[1.1fr_1fr] md:gap-14"
+    >
+      <div class="flex flex-col gap-5">
+        <p class="air-eyebrow">{contact.eyebrow}</p>
+        <DualHeadline
+          before={contact.headlineBefore}
+          cursive={contact.cursive}
+          after={contact.headlineAfter}
+          class="text-ink"
+        />
+        <p class="max-w-[46ch] text-body font-normal text-ink/75">
+          {contact.subtitle}
+        </p>
+      </div>
+
+      <div class="flex flex-col gap-3">
+        <a
+          href={`mailto:${site.email}`}
+          class="air-btn-light w-full !justify-center px-5 py-3"
+        >
+          Escribime a {site.email}
+        </a>
+
+        {
+          links.map((s) => (
+            <a
+              href={s.href}
+              class="air-btn-ghost w-full !justify-center px-5 py-3"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Abrir {s.label}
+            </a>
+          ))
+        }
+
+        {
+          cvUrl && (
+            <a
+              href={cvUrl}
+              class="air-btn-ghost w-full !justify-center px-5 py-3"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Ver CV
+            </a>
+          )
+        }
+
+        <p class="pt-1 text-center text-caption font-normal text-ink/60">
+          {contact.nota}
+        </p>
+      </div>
+    </div>
+  </div>
+</section>

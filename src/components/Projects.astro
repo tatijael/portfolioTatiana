@@ -1,0 +1,241 @@
+---
+import { projects } from '../data/site';
+import SectionHeader from './ui/SectionHeader.astro';
+
+/**
+ * Proyectos — una pila de tarjetas que se tapan al scrollear.
+ *
+ * Cada proyecto se queda pegado arriba y el siguiente le pasa por encima
+ * hasta cubrirlo. No es una galería: es un mazo que se va armando, y el
+ * scroll es el que reparte las cartas.
+ *
+ * ── Por qué se fue el React ──────────────────────────────────────────────
+ *
+ * Antes esto era `ProjectStack`, una isla React con `motion` que dibujaba un
+ * abanico. El efecto nuevo no necesita JS: `position: sticky` hace todo el
+ * trabajo, y lo hace mejor —lo resuelve el compositor, sigue el dedo sin un
+ * frame de retraso y funciona con el scroll suave de Lenis sin conectarse a
+ * nada. El chunk de 134 kB que hidrataba esa isla dejó de existir.
+ *
+ * ── Cómo se sostiene la pila ─────────────────────────────────────────────
+ *
+ * Cada tarjeta es `sticky` con el mismo `top`. Al llegar ahí se clava, y la
+ * siguiente —que viene más abajo en el flujo normal— sube hasta ese mismo
+ * punto y la tapa. Como el elemento pegajoso solo puede moverse dentro de su
+ * padre, y el padre es la lista entera, la primera tarjeta se queda clavada
+ * (debajo del resto) durante toda la sección en vez de irse.
+ *
+ * El orden de pintado lo da el orden del DOM: la última tarjeta se dibuja
+ * arriba de todas sin necesidad de `z-index`. Igual va escrito, porque
+ * depender de un orden implícito es pedir que alguien lo rompa moviendo una
+ * línea.
+ *
+ * ── Los dos detalles que lo pueden romper ────────────────────────────────
+ *
+ * 1. Ningún ancestro puede tener `transform`, `filter` ni `contain`: eso
+ *    crea un bloque contenedor nuevo y la tarjeta pasa a pegarse a ÉL en vez
+ *    de a la ventana. Por eso la pila no lleva `.air-reveal`, que anima un
+ *    `translateY` — la entrada va en la cabecera de la sección, no acá.
+ * 2. Ningún ancestro puede tener `overflow: hidden`, que desactiva sticky
+ *    por completo.
+ */
+
+// Mientras no haya capturas reales, cada tarjeta toma una de las imágenes de
+// cielo. Se reparten en ciclo para que dos vecinas nunca repitan.
+const fallbacks = [
+  '/images/sky-hero.jpg',
+  '/images/sky-poster.jpg',
+  '/images/sky-warm.jpg',
+];
+---
+
+<section
+  id="proyectos"
+  class="py-[var(--section-pad)] md:py-[var(--section-pad-lg)]"
+>
+  <div class="air-container flex flex-col gap-[var(--section-gap)]">
+    <SectionHeader
+      eyebrow="Proyectos"
+      before="Cosas que construí y siguen"
+      cursive="andando"
+      after="."
+      subtitle="E-commerce headless, productos con backend propio y sitios estáticos. Cada uno con su decisión técnica detrás."
+    />
+
+    <ol class="pila">
+      {
+        projects.map((p, i) => (
+          <li class="pila__carta" style={`--i: ${i}; --total: ${projects.length}`}>
+            <article class="pila__cuerpo">
+              <div class="pila__texto">
+                <p class="pila__meta">
+                  <span class="pila__num">
+                    {String(i + 1).padStart(2, '0')}
+                  </span>
+                  <span>{p.category}</span>
+                  <span class="pila__anio">{p.year}</span>
+                </p>
+
+                <h3 class="pila__titulo">{p.title}</h3>
+                <p class="pila__detalle">{p.detail}</p>
+
+                <ul class="pila__stack">
+                  {p.stack.map((t) => (
+                    <li class="air-chip">{t}</li>
+                  ))}
+                </ul>
+
+                {p.live && (
+                  <a class="air-link pila__link" href={p.live} target="_blank" rel="noopener noreferrer">
+                    Ver en vivo
+                  </a>
+                )}
+              </div>
+
+              <div class="pila__medio">
+                <img
+                  src={p.image ?? fallbacks[i % fallbacks.length]}
+                  alt=""
+                  loading="lazy"
+                  decoding="async"
+                />
+              </div>
+            </article>
+          </li>
+        ))
+      }
+    </ol>
+  </div>
+</section>
+
+<style>
+  .pila {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .pila__carta {
+    position: sticky;
+    /* El punto donde se clava: debajo de la nav fija, más un escalón por
+       tarjeta. Ese escalón es lo único que se ve de las que ya pasaron —un
+       borde asomando, como en un mazo— y es lo que hace legible que hay una
+       pila y no una sola tarjeta que cambia de contenido. */
+    top: calc(var(--nav-height, 72px) + 1.5rem + var(--i) * 12px);
+    /* El orden de pintado, explícito: la última arriba. Ver el comentario
+       del frontmatter. */
+    z-index: calc(var(--i) + 1);
+  }
+  /* El aire entre tarjetas es el recorrido de scroll que consume cada una
+     antes de que llegue la siguiente. Va como margen y no como `gap` porque
+     el `gap` de una lista no se reparte entre elementos pegajosos igual: lo
+     que importa acá es el alto que cada tarjeta ocupa EN EL FLUJO. */
+  .pila__carta + .pila__carta {
+    margin-top: var(--spacing-32, 2rem);
+  }
+
+  .pila__cuerpo {
+    display: grid;
+    gap: var(--spacing-32, 2rem);
+    align-items: center;
+    padding: clamp(1.25rem, 3vw, 2.5rem);
+    border-radius: var(--radius-cards);
+    /* Opaca de verdad, y no por casualidad: si la tarjeta tuviera un fondo
+       translúcido se vería el texto de la anterior por debajo y la pila se
+       leería como un borrón. */
+    background-color: var(--color-surface);
+    box-shadow: 0 0 0 1px var(--color-petal);
+  }
+  @media (min-width: 900px) {
+    .pila__cuerpo {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+    }
+  }
+
+  .pila__meta {
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+    margin: 0 0 1rem;
+    font-family: var(--font-hero-mono);
+    font-size: 0.6875rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-ink-soft);
+    opacity: 0.7;
+  }
+  .pila__num {
+    font-size: 1.5rem;
+    letter-spacing: 0;
+    color: var(--color-rosewood);
+    opacity: 1;
+  }
+  .pila__anio {
+    margin-left: auto;
+  }
+
+  .pila__titulo {
+    margin: 0 0 0.75rem;
+    font-family: var(--font-control-tnt);
+    font-size: var(--text-heading-fluid);
+    font-weight: var(--font-weight-medium);
+    line-height: 1.1;
+    color: var(--color-ink);
+  }
+
+  .pila__detalle {
+    margin: 0 0 1.25rem;
+    font-size: var(--text-body);
+    font-weight: 400;
+    line-height: 1.5;
+    color: color-mix(in srgb, var(--color-ink) 75%, transparent);
+  }
+
+  .pila__stack {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: 0 0 1.25rem;
+    padding: 0;
+    list-style: none;
+  }
+
+  .pila__link {
+    font-size: var(--text-caption);
+  }
+
+  .pila__medio {
+    overflow: hidden;
+    border-radius: var(--radius-images);
+    aspect-ratio: 16 / 10;
+  }
+  .pila__medio img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* ── El techo de alto en pantallas angostas ──────────────────────────
+     Apilada en una columna, la tarjeta suma texto MÁS imagen, y si termina
+     más alta que el espacio libre bajo la nav se clava con el pie afuera de
+     la pantalla: mientras está pegada nunca llegás a ver su final. Con el
+     recorte de alto sobre la imagen —que igual va `object-fit: cover`, o sea
+     que no se deforma— la tarjeta entra entera en cualquier teléfono. */
+  @media (max-width: 899px) {
+    .pila__medio {
+      aspect-ratio: 16 / 9;
+      max-height: 32svh;
+    }
+  }
+
+  /* Con menos movimiento, la pila deja de ser pila: las tarjetas se
+     desapilan y quedan una debajo de la otra. `sticky` no es una animación,
+     pero el efecto de que algo te tape mientras scrolleás es exactamente lo
+     que esta preferencia pide evitar. */
+  @media (prefers-reduced-motion: reduce) {
+    .pila__carta {
+      position: static;
+    }
+  }
+</style>

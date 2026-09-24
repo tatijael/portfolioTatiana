@@ -1,0 +1,256 @@
+---
+import { temas } from '../data/site';
+
+/**
+ * TemaSwitch — el control de clima, fijo al costado.
+ *
+ * Cuatro posiciones en una píldora vertical: tres soles que van del papel
+ * casi limpio al atardecer, y una luna. Lo que cambian son las diecisiete
+ * variables del bloque de temas de global.css; no hay una hoja de estilos
+ * por tema ni una clase por componente.
+ *
+ * ── Por qué los soles crecen ─────────────────────────────────────────────
+ *
+ * Los tres iconos de día son el MISMO dibujo a tres tamaños. Eso no es
+ * decoración: es la única manera de que el control se lea sin texto. Tres
+ * soles iguales serían tres botones indistinguibles y habría que ponerles
+ * una etiqueta; creciendo, el propio icono dice "más" y "menos" y el orden
+ * de arriba hacia abajo se vuelve una escala. La luna rompe la serie a
+ * propósito, porque no es "más sol todavía": es otra cosa.
+ *
+ * ── Accesibilidad ────────────────────────────────────────────────────────
+ *
+ * Es un grupo de radios, no cuatro botones sueltos: elegir un clima es
+ * elegir UNO de un conjunto excluyente, y con `role="radiogroup"` las
+ * flechas del teclado recorren las opciones y el lector anuncia "2 de 4".
+ * Con cuatro `<button>` habría que tabular cuatro veces y nada diría que
+ * son alternativas entre sí.
+ *
+ * Los iconos son `aria-hidden` y cada opción lleva su nombre en texto para
+ * lectores. El SVG no es un emoji: un emoji se lee distinto en cada
+ * plataforma y en varias aparece en color, que acá rompería el tema.
+ *
+ * ── Degradación ──────────────────────────────────────────────────────────
+ *
+ * Sin JS el control no aparece (`display: none` hasta `html.js`). No tendría
+ * sentido: no habría nada que pudiera cambiar el atributo ni guardarlo. El
+ * sitio se queda en `media`, que es el estado por defecto de los tokens.
+ */
+---
+
+<div class="tema" data-tema-switch>
+  <div class="tema__pastilla" role="radiogroup" aria-label="Clima del sitio">
+    {
+      temas.map((tema) => (
+        <button
+          type="button"
+          role="radio"
+          class="tema__opcion"
+          data-tema-opcion={tema.id}
+          aria-checked="false"
+          tabindex="-1"
+        >
+          <span class="sr-only">{tema.label}</span>
+
+          {tema.id === 'noche' ? (
+            <svg
+              class="tema__icono"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.6"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a6.6 6.6 0 0 0 10.5 10.5Z" />
+            </svg>
+          ) : (
+            /* El mismo sol a tres escalas. `--escala` lo fija cada opción
+               desde el CSS, así el SVG es literalmente el mismo dibujo. */
+            <svg
+              class="tema__icono tema__icono--sol"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.6"
+              stroke-linecap="round"
+            >
+              <circle cx="12" cy="12" r="3.6" />
+              <path d="M12 2.6v2.2M12 19.2v2.2M2.6 12h2.2M19.2 12h2.2" />
+              <path d="M5.4 5.4 7 7M17 17l1.6 1.6M18.6 5.4 17 7M7 17l-1.6 1.6" />
+            </svg>
+          )}
+        </button>
+      ))
+    }
+  </div>
+</div>
+
+<style>
+  /* Sin JS no hay nada que este control pueda hacer, así que no existe. */
+  .tema {
+    display: none;
+  }
+  :global(html.js) .tema {
+    display: block;
+    position: fixed;
+    /* Pegado al borde derecho y centrado en vertical, como la referencia.
+       Por encima de la nav (z-40) y del wordmark (z-45): es chrome, y tiene
+       que seguir siendo clickeable mientras el nombre viaja por delante de
+       todo lo demás. */
+    top: 50%;
+    right: clamp(0.75rem, 2vw, 1.75rem);
+    transform: translateY(-50%);
+    z-index: 50;
+  }
+
+  .tema__pastilla {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: 6px;
+    border-radius: var(--radius-pills);
+    /* El mismo vidrio que las tarjetas del sistema: papel translúcido sobre
+       el lavado, con la hairline de tinta. Los dos siguen al tema, así que
+       de noche esto se vuelve un azul más claro que el lienzo sin que haya
+       una regla para el caso oscuro. */
+    background-color: rgb(var(--papel-rgb) / 0.72);
+    border: 1px solid rgb(var(--tinta-rgb) / 0.12);
+    backdrop-filter: blur(10px);
+    transition:
+      background-color 420ms ease,
+      border-color 420ms ease;
+  }
+
+  .tema__opcion {
+    display: grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    border: 0;
+    border-radius: var(--radius-pills);
+    background-color: transparent;
+    color: rgb(var(--tinta-rgb) / 0.55);
+    cursor: pointer;
+    transition:
+      background-color 200ms ease,
+      color 200ms ease;
+  }
+  .tema__opcion:hover {
+    color: rgb(var(--tinta-rgb) / 0.9);
+    background-color: rgb(var(--tinta-rgb) / 0.06);
+  }
+
+  /* El activo se marca con la inversión de siempre: relleno de tinta, icono
+     en lienzo. Es el mismo gesto que usa `.air-pill[aria-pressed]`, así que
+     el control no inventa un estado propio del sistema. */
+  .tema__opcion[aria-checked='true'] {
+    background-color: var(--color-ink);
+    color: var(--color-canvas);
+  }
+
+  .tema__icono {
+    width: 18px;
+    height: 18px;
+  }
+  /* Los tres soles: mismo dibujo, tres tamaños. La escala va en el SVG y no
+     en el botón para que el área clickeable siga siendo la misma en las
+     cuatro opciones — un objetivo de 34px no se achica porque su icono sea
+     más chico. */
+  .tema__opcion[data-tema-opcion='suave'] .tema__icono--sol {
+    transform: scale(0.72);
+  }
+  .tema__opcion[data-tema-opcion='media'] .tema__icono--sol {
+    transform: scale(0.88);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .tema__pastilla,
+    .tema__opcion {
+      transition: none;
+    }
+  }
+</style>
+
+<script>
+  import { temas, TEMA_POR_DEFECTO, TEMA_CLAVE } from '../data/site';
+
+  const opciones = Array.from(
+    document.querySelectorAll<HTMLButtonElement>('[data-tema-opcion]'),
+  );
+  // Anotado como `string[]` a propósito: `temas` es `as const`, así que sin
+  // esto el array queda tipado con los cuatro literales y `includes` rechaza
+  // cualquier `string` — justo lo contrario de lo que se necesita acá, que es
+  // validar un valor que viene de localStorage y puede ser cualquier cosa.
+  const ids: string[] = temas.map((t) => t.id);
+  const meta = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
+
+  if (opciones.length) {
+    /**
+     * Aplica un clima.
+     *
+     * El atributo en <html> es la única fuente de verdad: el CSS lee de ahí
+     * y todo lo demás —los `aria-checked`, el `tabindex`, la barra del
+     * navegador— se deriva de él. No hay estado guardado en JS que pueda
+     * quedar desincronizado con lo que se ve.
+     */
+    const aplicar = (id: string, guardar = true) => {
+      const elegido = ids.includes(id) ? id : TEMA_POR_DEFECTO;
+      document.documentElement.dataset.tema = elegido;
+
+      opciones.forEach((op) => {
+        const activo = op.dataset.temaOpcion === elegido;
+        op.setAttribute('aria-checked', String(activo));
+        // Un solo punto de tabulación para todo el grupo, que es como se
+        // comporta un radiogroup: se entra con Tab y se recorre con flechas.
+        op.tabIndex = activo ? 0 : -1;
+      });
+
+      // La barra del navegador acompaña, si no en móvil queda una franja
+      // clara arriba de un sitio que se acaba de poner azul noche. El valor
+      // sale del lienzo ya resuelto, así que nunca se desfasa del tema.
+      if (meta) {
+        meta.content = getComputedStyle(document.documentElement)
+          .getPropertyValue('--color-canvas')
+          .trim();
+      }
+
+      if (guardar) {
+        try {
+          localStorage.setItem(TEMA_CLAVE, elegido);
+        } catch {
+          // Modo privado o storage bloqueado: el tema vale para esta visita
+          // y se pierde al recargar. No es motivo para romper el control.
+        }
+      }
+    };
+
+    // El script del <head> ya dejó puesto el atributo antes del primer
+    // paint; acá solo se sincronizan los controles con lo que ya está.
+    aplicar(document.documentElement.dataset.tema ?? TEMA_POR_DEFECTO, false);
+
+    opciones.forEach((op, i) => {
+      op.addEventListener('click', () => aplicar(op.dataset.temaOpcion ?? ''));
+
+      // Flechas: recorren el grupo y aplican al pasar, que es el
+      // comportamiento esperado de un radiogroup (no hace falta confirmar).
+      op.addEventListener('keydown', (e) => {
+        const paso =
+          e.key === 'ArrowDown' || e.key === 'ArrowRight'
+            ? 1
+            : e.key === 'ArrowUp' || e.key === 'ArrowLeft'
+              ? -1
+              : 0;
+        if (!paso) return;
+        e.preventDefault();
+        const destino = opciones[(i + paso + opciones.length) % opciones.length];
+        aplicar(destino.dataset.temaOpcion ?? '');
+        destino.focus();
+      });
+    });
+  }
+</script>

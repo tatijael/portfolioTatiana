@@ -1,0 +1,1355 @@
+@import 'tailwindcss';
+
+/* ── Tipografías (locales, sin requests externas) ────────────────────────────
+   Control          → Inter Variable   (interfaz, body, nav, botones)
+   Control Compressed → Anton          (display 259px, uppercase)
+   Control Cursive  → Caveat           (acento itálico dentro de headlines)
+   Control TNT      → Inter Variable   (display upright)
+   Si algún día comprás las fuentes reales, reemplazá solo estos imports
+   y los valores de --font-* de abajo. Nada más cambia.
+--------------------------------------------------------------------------- */
+@import '@fontsource-variable/inter';
+@import '@fontsource/anton';
+@import '@fontsource/caveat/400.css';
+@import '@fontsource/caveat/500.css';
+
+/* ── Tipografías del hero ────────────────────────────────────────────────────
+   El hero no usa el sistema Air: es el que tenías antes de la fusión y viene
+   con su propio par tipográfico. Se importan acá para que sigan siendo
+   locales como el resto (nada de Google Fonts por CDN).
+
+   Archivo Variable se importa por el archivo `wdth`, no por el índice: es el
+   único que trae el eje de ancho, y el título cromado va estirado a 112%.
+--------------------------------------------------------------------------- */
+@import '@fontsource-variable/archivo/wdth.css';
+@import '@fontsource-variable/jetbrains-mono';
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   AIR — Design Tokens
+   Traducción 1:1 de design-tokens.json (formato DTCG).
+
+   `static` emite TODAS las variables del bloque, aunque ninguna clase las use.
+   Sin esto Tailwind hace tree-shaking y tokens como --surface-* o --radius-md
+   desaparecen del CSS final, rompiendo la paridad con el JSON.
+   ═══════════════════════════════════════════════════════════════════════════ */
+@theme static {
+  /* ── Colores ─────────────────────────────────────────────────────────── */
+  --color-whiteout: #ffffff;
+  --color-haze: #f5f5f5;
+  --color-ink: #1b1b1b;
+  --color-black-void: #000000;
+  /* Vuelve a tener uso en el tema claro: está calibrado para leerse sobre
+     blanco (6.29:1 sobre el lienzo) y es el frío disponible del sistema si
+     alguna vez hace falta algo que no sea rosa. */
+  --color-twilight-blue: #426188;
+  --color-signal-blue: #2b7fff;
+
+  /* ── Tokens que no están en design-tokens.json ─────────────────────────
+     El sistema Air define una paleta neutra —blanco, haze, tinta, negro— y
+     un solo acento saturado. No trae pasteles. Estos son la extensión
+     mínima para el tema claro rosa/durazno, y viven acá abajo, separados,
+     para que el bloque de arriba siga siendo la traducción 1:1 del JSON.
+
+     LIENZO Y SUPERFICIES
+     Canvas es blanco roto cálido, no blanco puro: sobre una pantalla grande
+     el #ffffff pleno cansa, y medio grado de calidez lo asienta sin que se
+     lea como "beige". Las tarjetas sí van en Whiteout pleno, así se separan
+     del lienzo por ser MÁS claras — el escalón invertido del tema oscuro,
+     donde se separaban por ser más claras que el negro. Surface Raised es
+     el segundo escalón (tarjeta sobre tarjeta), teñido de rosa en vez del
+     Haze neutro: sobre un lienzo cálido, un gris frío se ve sucio.
+
+     LAVADOS
+     Blush y Peach son los dos lavados que alternan a lo largo del scroll.
+     Son casi blancos a propósito: el color tiene que leerse como luz sobre
+     el papel, no como una banda pintada.
+
+     ACENTO
+     Rosewood es el único acento saturado, y está bajado en luminosidad
+     hasta pasar AA como texto: 5.84:1 sobre el lienzo y 5.23:1 sobre el
+     lavado rosa, que es la parada más oscura y por lo tanto el peor caso.
+     Rosewood Soft (#b4636f) es el rosa "lindo" de la paleta pero mide
+     4.19:1 sobre blanco: NO va en texto normal. Queda para display grande
+     (que pide 3:1) y para trazos decorativos.
+
+     Petal es la hairline pastel: no es texto, no entra en el cálculo. */
+  --color-canvas: #fffdfb;
+  --color-ink-soft: #33302f;
+  --color-surface: #ffffff;
+  --color-surface-raised: #fdf6f3;
+  --color-blush: #fbeef0;
+  --color-peach: #fdeee2;
+  --color-petal: #e8cfc6;
+  --color-rosewood: #9d4a58;
+  --color-rosewood-soft: #b4636f;
+
+  /* ── Familias tipográficas ───────────────────────────────────────────── */
+  --font-control: 'Inter Variable', ui-sans-serif, system-ui, -apple-system,
+    BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-control-compressed: 'Anton', 'Inter Variable', ui-sans-serif, system-ui,
+    -apple-system, sans-serif;
+  --font-control-cursive: 'Caveat', ui-sans-serif, system-ui, -apple-system,
+    cursive;
+  --font-control-tnt: 'Inter Variable', ui-sans-serif, system-ui, -apple-system,
+    BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
+  /* ── Escala tipográfica ──────────────────────────────────────────────── */
+  --text-caption: 13px;
+  --text-caption--line-height: 1.5;
+  --text-body: 16px;
+  --text-body--line-height: 1.5;
+  --text-subheading: 20px;
+  --text-subheading--line-height: 1.4;
+  --text-heading: 32px;
+  --text-heading--line-height: 1.1;
+  --text-heading-lg: 56px;
+  --text-heading-lg--line-height: 1;
+  --text-display: 259px;
+  --text-display--line-height: 0.85;
+
+  /* Variantes fluidas: mismo techo del token, pero legibles en mobile.
+     El máximo coincide exactamente con el valor del sistema. */
+  --text-heading-fluid: clamp(24px, 5vw, 32px);
+  --text-heading-fluid--line-height: 1.1;
+  --text-heading-lg-fluid: clamp(32px, 6.5vw, 56px);
+  --text-heading-lg-fluid--line-height: 1;
+  --text-display-fluid: clamp(64px, 19vw, 259px);
+  --text-display-fluid--line-height: 0.85;
+
+  /* ── Pesos ───────────────────────────────────────────────────────────── */
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-black: 900;
+
+  /* ── Espaciado (base 4px) ────────────────────────────────────────────── */
+  /* Multiplicador de Tailwind: p-4 → 16px, gap-6 → 24px, etc. */
+  --spacing: 4px;
+
+  /* ── Radios ──────────────────────────────────────────────────────────── */
+  /* Escala cruda de design-tokens.json */
+  --radius-md: 4px;
+  --radius-lg: 8px;
+  --radius-lg-2: 11px;
+  --radius-xl: 14px;
+  /* Alias semánticos (tabla "Border Radius" del style reference) */
+  --radius-inputs: 4px;
+  --radius-buttons: 8px;
+  --radius-images: 11px;
+  --radius-cards: 12px;
+  --radius-pills: 9999px;
+
+  /* ── Superficies ─────────────────────────────────────────────────────── */
+  --surface-dark-canvas: #000000;
+  --surface-haze-card: #f5f5f5;
+  --surface-whiteout: #ffffff;
+
+  /* ── Layout ──────────────────────────────────────────────────────────── */
+  --page-max-width: 1150px;
+  --section-gap: 48px;
+
+  /* ── El aire ENTRE secciones ────────────────────────────────────────
+     Ojo con la cuenta: este valor se aplica arriba Y abajo de cada
+     sección, así que entre dos secciones vecinas el hueco es el DOBLE.
+     Con los 120px que había antes quedaban 240px de blanco entre una
+     sección y la siguiente, que en una pantalla de portátil es casi media
+     pantalla vacía.
+
+     Es el único lugar donde se toca el ritmo vertical de la página: los
+     seis componentes que lo usan leen de acá. Si querés más o menos aire,
+     se cambia este número y nada más. */
+  --section-pad: 40px;
+  --section-pad-lg: 72px;
+  --card-padding: 20px;
+  --element-gap: 8px;
+  --nav-height: 72px;
+}
+
+/* ── Escala de espaciado nombrada del sistema Air ───────────────────────────
+   Va fuera de @theme a propósito: dentro, `--spacing-4` pisaría el
+   multiplicador de Tailwind y `gap-4` pasaría a valer 4px en vez de 16px.
+   Se usan como var(--spacing-120) en clases arbitrarias.
+--------------------------------------------------------------------------- */
+:root {
+  --spacing-unit: 4px;
+  --spacing-4: 4px;
+  --spacing-8: 8px;
+  --spacing-12: 12px;
+  --spacing-16: 16px;
+  --spacing-20: 20px;
+  --spacing-24: 24px;
+  --spacing-32: 32px;
+  --spacing-48: 48px;
+  --spacing-52: 52px;
+  --spacing-64: 64px;
+  --spacing-80: 80px;
+  --spacing-120: 120px;
+
+  /* Line-heights nombrados del Quick Start. Tailwind los consume vía
+     `--text-*--line-height` dentro de @theme; estos existen para poder
+     escribirlos a mano en CSS suelto sin recordar el número. */
+  --leading-caption: 1.5;
+  --leading-body: 1.5;
+  --leading-subheading: 1.4;
+  --leading-heading: 1.1;
+  --leading-heading-lg: 1;
+  --leading-display: 0.85;
+
+  /* ── Tokens del hero ──────────────────────────────────────────────────
+     Van acá y no en @theme a propósito: ese bloque es la traducción 1:1 de
+     design-tokens.json y el hero no pertenece al sistema Air. Es una pieza
+     con su propio lenguaje —violeta, cromado, monoespaciada— que sobrevivió
+     a la fusión porque es la que abre el sitio.
+
+     Con el tema claro el violeta se fue: el halo ahora es un rubor
+     rosa/durazno, que es luz difusa sobre papel, no texto, y tampoco entra
+     en el cálculo de contraste.
+
+     Hero Mist es el gris del texto secundario del hero. Subió de #a1a1aa
+     (calibrado para leerse sobre negro) a un gris cálido que mide 5.21:1
+     sobre el lienzo: el mismo rol, recalibrado para el fondo nuevo. */
+  --hero-blush: #f2c9cf;
+  --hero-peach: #f8d8bf;
+  --hero-rose-line: #c97f8b;
+  --hero-mist: #6f6a72;
+  --hero-line: #1b1b1b1f;
+
+  --font-hero-display: 'Archivo Variable', 'Inter Variable', ui-sans-serif,
+    system-ui, sans-serif;
+  --font-hero-mono: 'JetBrains Mono Variable', ui-monospace, SFMono-Regular,
+    Menlo, monospace;
+
+  /* El techo es más bajo que el del hero original (6.5rem) porque el
+     contenedor de Air mide 1150px y no los 1280px del `.wrap` viejo: con
+     6.5rem, "DEVELOPER" no entraba en su pista y la máscara de la línea lo
+     cortaba a la mitad. */
+  --text-hero: clamp(2.5rem, 6.6vw, 5.5rem);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   LOS CUATRO TEMAS
+   ═══════════════════════════════════════════════════════════════════════════
+
+   El sitio tiene cuatro climas, y se eligen con el control vertical del
+   costado. Tres son de día y van del papel casi limpio al atardecer; el
+   cuarto es de noche.
+
+       suave    el lavado apenas se insinúa, casi papel
+       media    el durazno de siempre — es el que estaba y es el que arranca
+       calida   naranja saturado, luz de las siete de la tarde
+       noche    azul profundo, la tinta se da vuelta
+
+   ── Cómo está armado, y por qué así ────────────────────────────────────
+
+   Un tema NO es una hoja de estilos aparte: es este bloque de diecisiete
+   variables, y nada más. Todo el resto del CSS —botones, tarjetas, vidrios,
+   hairlines, lavados de sección— está escrito contra esas diecisiete. Por
+   eso agregar un quinto clima es agregar un bloque acá abajo, sin tocar un
+   solo componente.
+
+   Las dos que hacen el trabajo pesado son `--tinta-rgb` y `--papel-rgb`, y
+   existen por un problema concreto: los colores con alfa no se pueden
+   derivar de un hex. Media interfaz está hecha de `rgb(var(--tinta-rgb) / 0.1)` —
+   hairlines, rellenos de vidrio, el pulgar de la barra de scroll— y esos
+   valores tenían la tinta escrita adentro. Guardando los canales sueltos,
+   la misma regla sirve para los cuatro temas: de noche `--tinta-rgb` se da
+   vuelta y todas las hairlines pasan de oscuras sobre papel a claras sobre
+   azul, sin que ninguna regla se entere.
+
+   `--lienzo-rgb` es el tercero y nació de un bug: la nav usaba
+   `color-mix(var(--color-canvas) 88%, transparent)` y al cambiar de clima se
+   quedaba blanca. Chrome NO sabe interpolar un `background-color` que es un
+   `color-mix()` cuyas `var()` cambiaron: la transición retiene el valor
+   viejo y no lo suelta nunca. Con los canales sueltos el color es un
+   `rgb()` común, que sí interpola. Regla práctica: si una propiedad tiene
+   `transition` y depende del tema, NO la armes con `color-mix()`.
+
+   `--papel-rgb` no siempre es el papel, y eso es a propósito. De día los
+   vidrios son blanco translúcido sobre el lavado. De noche un blanco
+   translúcido sería un velo lechoso, así que pasa a ser un azul MÁS CLARO
+   que el lienzo: la tarjeta se separa del fondo por ser más clara, que es
+   el escalón invertido de siempre.
+
+   ── Contraste ──────────────────────────────────────────────────────────
+
+   Cada tema se calibró contra su propio peor caso, que es la parada más
+   oscura de su lavado, no el lienzo pelado:
+
+       suave / media   tinta #1b1b1b sobre #fbeef0 → 15.3:1
+       calida          tinta #1b1b1b sobre #fbdcbb → 13.9:1
+                       acento #a8502f sobre #fffaf4 → 5.9:1
+       noche           tinta #eef2f8 sobre #0d1420 → 16.1:1
+                       acento #f0a87a sobre #0d1420 → 8.7:1
+
+   Los acentos son el punto flojo de cualquier tema, así que los dos nuevos
+   se bajaron en luminosidad hasta pasar AA como texto normal, igual que se
+   hizo con Rosewood en su momento. */
+
+/* ── Tema 2: media — el de siempre ──────────────────────────────────────
+   Va sin selector además del suyo para que sea también el estado por
+   defecto: si el atributo falta —JS apagado, primer render antes de que
+   corra el script del layout— el sitio se ve exactamente como se veía. */
+:root,
+html[data-tema='media'] {
+  --color-canvas: #fffdfb;
+  --color-ink: #1b1b1b;
+  --color-ink-soft: #33302f;
+  --color-surface: #ffffff;
+  --color-surface-raised: #fdf6f3;
+  --color-blush: #fbeef0;
+  --color-peach: #fdeee2;
+  --color-petal: #e8cfc6;
+  --color-rosewood: #9d4a58;
+  --color-rosewood-soft: #b4636f;
+
+  --tinta-rgb: 27 27 27;
+  --papel-rgb: 255 255 255;
+  --lienzo-rgb: 255 253 251;
+
+  --hero-blush: #f2c9cf;
+  --hero-peach: #f8d8bf;
+  --hero-rose-line: #c97f8b;
+  --hero-mist: #6f6a72;
+  --hero-line: #1b1b1b1f;
+}
+
+/* ── Tema 1: suave ──────────────────────────────────────────────────────
+   Misma tinta y mismas superficies: lo único que se mueve son los lavados,
+   que se acercan al lienzo hasta quedar al borde de no verse. Es el tema
+   para leer, no para mirar. */
+html[data-tema='suave'] {
+  --color-canvas: #fffdfb;
+  --color-ink: #1b1b1b;
+  --color-ink-soft: #33302f;
+  --color-surface: #ffffff;
+  --color-surface-raised: #fefaf8;
+  --color-blush: #fdf7f6;
+  --color-peach: #fdf9f4;
+  --color-petal: #f0ded8;
+  --color-rosewood: #9d4a58;
+  --color-rosewood-soft: #b4636f;
+
+  --tinta-rgb: 27 27 27;
+  --papel-rgb: 255 255 255;
+  --lienzo-rgb: 255 253 251;
+
+  --hero-blush: #f8e4e5;
+  --hero-peach: #fbecdf;
+  --hero-rose-line: #d8a3aa;
+  --hero-mist: #6f6a72;
+  --hero-line: #1b1b1b17;
+}
+
+/* ── Tema 3: cálida ─────────────────────────────────────────────────────
+   Acá el rosa se va del todo y queda el durazno solo, subido de saturación.
+   El acento acompaña: el Rosewood ciruela no pega con un lavado naranja, así
+   que pasa a una teja oscura que mide 5.9:1 sobre el lienzo. */
+html[data-tema='calida'] {
+  --color-canvas: #fffaf4;
+  --color-ink: #1b1b1b;
+  --color-ink-soft: #3a3029;
+  --color-surface: #fffefc;
+  --color-surface-raised: #fdf0e4;
+  --color-blush: #fde5d6;
+  --color-peach: #fbdcbb;
+  --color-petal: #e8c09c;
+  --color-rosewood: #a8502f;
+  --color-rosewood-soft: #c2703f;
+
+  --tinta-rgb: 27 27 27;
+  --papel-rgb: 255 255 255;
+  --lienzo-rgb: 255 250 244;
+
+  --hero-blush: #f9cba6;
+  --hero-peach: #f6b98a;
+  --hero-rose-line: #c9825a;
+  --hero-mist: #6f6558;
+  --hero-line: #1b1b1b24;
+}
+
+/* ── Tema 4: noche ──────────────────────────────────────────────────────
+   La única inversión de rol del conjunto: Ink pasa a ser el texto CLARO y
+   Canvas el lienzo OSCURO. Como todo el CSS está escrito como "tinta sobre
+   lienzo" y no como "negro sobre blanco", dar vuelta esos dos valores da
+   vuelta el sitio entero: los botones sólidos quedan claros con texto
+   oscuro, las hairlines pasan a ser luz, los vidrios se vuelven azul.
+
+   El acento se va al naranja a propósito y no al rosa: es el calor de los
+   tres temas de día, conservado en el único que no tiene sol. */
+html[data-tema='noche'] {
+  --color-canvas: #0d1420;
+  --color-ink: #eef2f8;
+  --color-ink-soft: #c3cddb;
+  --color-surface: #16202f;
+  --color-surface-raised: #1d2a3c;
+  --color-blush: #141d2b;
+  --color-peach: #182231;
+  --color-petal: #33435c;
+  --color-rosewood: #f0a87a;
+  --color-rosewood-soft: #d98a5c;
+
+  --tinta-rgb: 238 242 248;
+  /* Más claro que el lienzo, no más oscuro: ver el comentario de arriba. */
+  --papel-rgb: 40 56 78;
+  --lienzo-rgb: 13 20 32;
+
+  --hero-blush: #2a3a55;
+  --hero-peach: #34415e;
+  --hero-rose-line: #6d86b5;
+  --hero-mist: #9aa7bb;
+  --hero-line: #eef2f824;
+
+  /* Lo único que el tema necesita decirle al navegador además del color:
+     sin esto los controles nativos (scrollbars, autofill) siguen claros. */
+  color-scheme: dark;
+}
+
+/* El cambio de clima es un gesto del usuario, así que se ve. No se anima
+   `background-image` —no es interpolable y el navegador haría un corte
+   seco—: se animan los colores planos, que son la mayoría de la superficie,
+   y el degradado del fondo cambia de golpe por debajo sin que se note. */
+@media (prefers-reduced-motion: no-preference) {
+  :root {
+    transition:
+      background-color 420ms ease,
+      color 420ms ease;
+  }
+  body,
+  .air-card,
+  .air-glass,
+  .air-pill,
+  .air-btn-ghost,
+  .air-btn-light {
+    transition:
+      background-color 420ms ease,
+      border-color 420ms ease,
+      color 420ms ease;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Base — tema CLARO, lienzo pastel
+   Tercera vuelta de los roles. El tema claro original decía "Ink es el
+   texto, Whiteout la superficie de tarjeta". El oscuro lo espejó. Esto
+   vuelve al reparto claro, pero sobre papel teñido en vez de blanco pleno:
+
+     Canvas          → el lienzo de la página (blanco roto cálido)
+     Blush / Peach   → los dos lavados que alternan a lo largo del scroll
+     Surface         → la superficie de tarjeta (Whiteout pleno)
+     Surface Raised  → la tarjeta apoyada sobre otra tarjeta
+     Ink             → el texto
+     Ink @ 10-15%    → las hairlines
+     Rosewood        → el único acento saturado
+     Petal           → la hairline pastel de las piezas de vidrio
+
+   El cambio que más se nota no es de color sino de DIRECCIÓN: en oscuro una
+   tarjeta se separaba del fondo por ser más CLARA que el lienzo. Acá el
+   lienzo ya es casi blanco, así que una tarjeta no puede aclararse más. Se
+   separa al revés: la tarjeta es Whiteout pleno sobre un lienzo teñido, y
+   donde eso no alcanza —sobre un lavado muy tenue— lo resuelve la hairline
+   de tinta, no un relleno más fuerte.
+
+   Las reglas duras del sistema siguen intactas: sin sombras, sin gradientes
+   en la UI, sin botones de color sólido. La separación entre superficies la
+   hace el escalón de luminosidad más una hairline de tinta — nunca una
+   sombra. Los pasteles son lavados de fondo, no rellenos de control: ningún
+   botón, ninguna píldora y ningún borde de foco se pintan de rosa.
+   ═══════════════════════════════════════════════════════════════════════════ */
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    /* Compensa la nav fija al saltar a una sección */
+    scroll-padding-top: var(--nav-height);
+  }
+
+  /* Lenis toma el control del scroll (ver Layout.astro). Si el smooth nativo
+     sigue activo, el navegador y Lenis interpolan el mismo gesto a la vez y
+     el scroll da saltos. La clase solo se agrega cuando Lenis arranca: sin
+     JS, o con prefers-reduced-motion, la regla de arriba queda vigente.
+
+     Por esto el <html> del layout NO lleva `class="scroll-smooth"`: esa
+     utilidad de Tailwind vive en la capa `utilities`, que le gana a
+     cualquier regla de `base`, y esta línea no podría apagarla. */
+  html.lenis {
+    scroll-behavior: auto;
+  }
+
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    background-color: var(--color-canvas);
+  }
+
+
+  /* ── Un solo fondo para toda la página ─────────────────────────────────
+     Antes cada sección traía el suyo y entre una y otra quedaba un corte
+     horizontal visible. Ahora hay un solo fondo y va `fixed`: no se mueve
+     con el contenido, así que la pantalla se ve igual al principio, en el
+     medio y al final. Va en `body` y no en `main` para que el footer —que
+     queda fuera de main— apoye sobre el mismo fondo.
+
+     El recorrido arranca en blanco casi puro (el hero necesita silencio
+     detrás del título), entra en rosa en el cuerpo del sitio, pasa a
+     durazno en la mitad de abajo y vuelve a cerrar en blanco. Las paradas
+     no son arbitrarias: coinciden con dónde cae cada sección, así el cambio
+     de lavado pasa ENTRE bloques y no a mitad de un párrafo.
+
+     Se fueron las nubes. El SVG es de nubes BLANCAS: sobre el índigo del
+     tema oscuro aportaban una nebulosa, sobre papel casi blanco no se ven y
+     lo único que hacían era ensuciar el degradado. El archivo queda en
+     public/images por si el fondo vuelve a ser oscuro alguna vez. */
+  body {
+    background-color: var(--color-canvas);
+    background-image: linear-gradient(
+      to bottom,
+      var(--color-canvas) 0%,
+      color-mix(in oklab, var(--color-blush) 32%, var(--color-canvas)) 14%,
+      color-mix(in oklab, var(--color-blush) 76%, var(--color-canvas)) 34%,
+      var(--color-blush) 52%,
+      color-mix(in oklab, var(--color-peach) 72%, var(--color-canvas)) 70%,
+      var(--color-peach) 84%,
+      color-mix(in oklab, var(--color-peach) 28%, var(--color-canvas)) 100%
+    );
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+  }
+
+  body {
+    color: var(--color-ink);
+    font-family: var(--font-control);
+    font-size: var(--text-body);
+    font-weight: var(--font-weight-medium);
+    line-height: 1.5;
+  }
+
+  /* Único lugar donde el rosa se usa como RELLENO y no como lavado: la
+     selección es un estado efímero del usuario, no chrome de interfaz. El
+     texto sigue en tinta encima, 15.3:1. */
+  ::selection {
+    background-color: var(--color-blush);
+    color: var(--color-ink);
+  }
+
+  /* El foco va en tinta, no en rosa: tiene que ser el elemento de mayor
+     contraste de la página, y un pastel no llega. */
+  :focus-visible {
+    outline: 2px solid var(--color-ink);
+    outline-offset: 2px;
+  }
+
+  /* Sin elevación en ningún lado: el sistema Air no usa sombras */
+  ::-webkit-scrollbar {
+    width: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--color-canvas);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: rgb(var(--tinta-rgb) / 0.2);
+    border-radius: var(--radius-pills);
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgb(var(--tinta-rgb) / 0.38);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Componentes del sistema
+   Reglas duras de Air: sin sombras, sin gradientes en la UI, sin botones
+   sólidos de color. Los botones son ghost (transparente + borde) o haze
+   (relleno claro). Un solo acento saturado por página: Signal Blue, y solo
+   en links.
+
+   Cada componente tenía su par: la versión base sobre superficie clara
+   (texto Ink) y la variante `--on-sky` sobre el cielo (texto Whiteout). En
+   oscuro las dos convergían. En claro vuelven a convergir, pero del otro
+   lado: todo el sitio es "sobre superficie clara" ahora. Las variantes
+   `--on-sky` se conservan porque los componentes las nombran y quitarlas
+   sería un cambio de API a cambio de nada, pero no hacen diferencia
+   visual.
+   ═══════════════════════════════════════════════════════════════════════════ */
+@layer components {
+  /* ── Pasos tipográficos compuestos ─────────────────────────────────────
+     Traducción 1:1 del nodo `typography` de design-tokens.json. Cada clase
+     fija familia + tamaño + peso + interlineado juntos, que es como el
+     sistema define un paso — no como tres decisiones sueltas.
+  ---------------------------------------------------------------------- */
+  .type-xs {
+    font: var(--font-weight-medium) 12px / 1.5 var(--font-control);
+  }
+  .type-xs-2 {
+    font: var(--font-weight-medium) 12px / 1.1 var(--font-control);
+  }
+  .type-sm {
+    font: var(--font-weight-medium) 13px / 1.5 var(--font-control);
+  }
+  .type-sm-2 {
+    font: var(--font-weight-medium) 14px / 1.5 var(--font-control);
+  }
+  .type-base {
+    font: var(--font-weight-medium) 16px / 1.5 var(--font-control);
+  }
+  .type-xl {
+    font: var(--font-weight-medium) 20px / 1.5 var(--font-control-tnt);
+  }
+  .type-xl-2 {
+    font: italic var(--font-weight-medium) 20px / 1.5 var(--font-control-cursive);
+  }
+  .type-xl-3 {
+    font: var(--font-weight-medium) 20px / 1.4 var(--font-control);
+  }
+  .type-3xl {
+    font: italic var(--font-weight-medium) 32px / 1.1 var(--font-control-cursive);
+  }
+  .type-3xl-2 {
+    font: var(--font-weight-medium) 32px / 1.1 var(--font-control-tnt);
+  }
+  .type-5xl {
+    font: var(--font-weight-regular) 56px / 1 var(--font-control-tnt);
+  }
+  .type-5xl-2 {
+    font: italic var(--font-weight-regular) 56px / 1 var(--font-control-cursive);
+  }
+  .type-5xl-3 {
+    font: var(--font-weight-black) 259px / 0.85 var(--font-control-compressed);
+    text-transform: uppercase;
+  }
+
+  /* ── Contenedor de página ──────────────────────────────────────────── */
+  .air-container {
+    width: 100%;
+    max-width: var(--page-max-width);
+    margin-inline: auto;
+    padding-inline: var(--spacing-24);
+  }
+
+  /* ── Ghost Button ──────────────────────────────────────────────────────
+     Borde Ink sobre el lienzo claro. Al hover se rellena en Ink y el texto
+     sube a Canvas: la inversión sigue siendo el estado activo, espejada. */
+  .air-btn-ghost {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--element-gap);
+    background-color: transparent;
+    border: 1px solid rgb(var(--tinta-rgb) / 0.4);
+    border-radius: var(--radius-buttons);
+    color: var(--color-ink);
+    font-family: var(--font-control);
+    font-size: 14px;
+    font-weight: var(--font-weight-medium);
+    line-height: 1.4;
+    padding: 10px 16px;
+    text-decoration: none;
+    transition:
+      background-color 200ms ease,
+      color 200ms ease,
+      border-color 200ms ease;
+  }
+  .air-btn-ghost:hover {
+    background-color: var(--color-ink);
+    border-color: var(--color-ink);
+    color: var(--color-canvas);
+  }
+
+  .air-btn-ghost--on-sky {
+    border-color: rgb(var(--tinta-rgb) / 0.4);
+    color: var(--color-ink);
+  }
+  .air-btn-ghost--on-sky:hover {
+    background-color: var(--color-ink);
+    border-color: var(--color-ink);
+    color: var(--color-canvas);
+  }
+
+  /* ── Solid Button ──────────────────────────────────────────────────────
+     El CTA primario de Air. La regla del sistema no es "relleno claro": es
+     que el CTA primario sea el elemento de MAYOR contraste contra el fondo,
+     y que nunca se pinte de un color de marca. Sobre lienzo negro eso daba
+     un botón blanco. Sobre papel casi blanco da un botón de tinta.
+
+     Sigue sin ser color sólido —la tinta es el neutro del sistema, no un
+     acento— así que la regla se respeta aunque el resultado sea el opuesto
+     del que tenía el tema oscuro.
+
+     El hover no invierte a claro: un botón que se vuelve blanco sobre un
+     lienzo blanco desaparece. Sube a Ink Raised, un escalón apenas más
+     suave, y la jerarquía se mantiene. El nombre de la clase queda como
+     está: lo consumen Contacto, el skip link y los botones del hero, y
+     renombrarlo sería un cambio de API a cambio de nada. */
+  .air-btn-light {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--element-gap);
+    background-color: var(--color-ink);
+    border: 1px solid var(--color-ink);
+    border-radius: var(--radius-buttons);
+    color: var(--color-canvas);
+    font-family: var(--font-control);
+    font-size: 14px;
+    font-weight: var(--font-weight-medium);
+    line-height: 1.4;
+    padding: 10px 16px;
+    text-decoration: none;
+    transition:
+      background-color 200ms ease,
+      color 200ms ease;
+  }
+  .air-btn-light:hover {
+    background-color: var(--color-ink-soft);
+    border-color: var(--color-ink-soft);
+    color: var(--color-canvas);
+  }
+
+  /* Queda solo como el paso de padding más ajustado que usa el hero: con un
+     botón de tinta sobre lienzo claro, el borde extra que le daba sentido
+     en la primera versión del tema claro ya no hace falta. */
+  .air-btn-light--bordered {
+    padding: 8px 16px;
+  }
+
+  /* ── Pill Toggle Button ────────────────────────────────────────────────
+     Único lugar del sistema donde se usan formas de píldora. */
+  .air-pill {
+    display: inline-flex;
+    align-items: center;
+    background-color: rgb(var(--tinta-rgb) / 0.04);
+    border: 1px solid rgb(var(--tinta-rgb) / 0.16);
+    border-radius: var(--radius-pills);
+    color: var(--color-ink);
+    font-family: var(--font-control);
+    font-size: 13px;
+    font-weight: var(--font-weight-medium);
+    line-height: 1.4;
+    padding: 6px 14px;
+    transition:
+      background-color 200ms ease,
+      border-color 200ms ease,
+      color 200ms ease;
+  }
+  .air-pill:hover {
+    background-color: rgb(var(--tinta-rgb) / 0.07);
+    border-color: rgb(var(--tinta-rgb) / 0.3);
+  }
+  .air-pill[aria-pressed='true'] {
+    background-color: var(--color-ink);
+    border-color: var(--color-ink);
+    color: var(--color-canvas);
+  }
+
+  /* ── Underline Link ────────────────────────────────────────────────────
+     El componente del sistema admite Signal Blue O Ink, y define el subrayado
+     de 2px como "the primary affordance — no color fill".
+
+     El default vuelve a ser Ink.
+
+     Y acá se devuelve lo que el tema oscuro había ganado: Signal Blue
+     (#2b7fff) mide 3.76:1 sobre el lienzo claro y vuelve a quedar vetado
+     para texto normal. En vez de dejar la variante rota o de bajar el azul
+     —que ya no sería Signal Blue—, `--signal` pasa a Rosewood, que es el
+     acento saturado de esta paleta y mide 5.84:1 sobre el lienzo. El nombre
+     de la clase se mantiene porque lo que nombra es el ROL ("el único
+     acento saturado"), no el color.
+
+     Sigue valiendo la regla de un solo acento por página: usalo en el link
+     que importa, no en todos. */
+  .air-link {
+    background-color: transparent;
+    border-bottom: 2px solid currentColor;
+    color: var(--color-ink);
+    font-weight: var(--font-weight-medium);
+    padding-inline: 8px;
+    padding-bottom: 2px;
+    text-decoration: none;
+    transition: opacity 200ms ease;
+  }
+  .air-link:hover {
+    opacity: 0.65;
+  }
+  .air-link--signal {
+    color: var(--color-rosewood);
+  }
+  .air-link--white {
+    color: var(--color-ink);
+  }
+
+  /* ── Tarjeta sólida ────────────────────────────────────────────────────
+     Whiteout pleno sobre el lienzo teñido: un escalón de luminosidad hacia
+     ARRIBA, plana, sin sombra. Acá el escalón es todavía más corto que en
+     oscuro —del blanco roto al blanco pleno hay muy poco— así que la
+     hairline de tinta no es un refuerzo, es lo que dibuja la tarjeta. Sin
+     ella no habría tarjeta. Sigue siendo línea, no sombra. */
+  .air-card {
+    background-color: var(--color-surface);
+    border: 1px solid rgb(var(--tinta-rgb) / 0.1);
+    border-radius: var(--radius-cards);
+    color: var(--color-ink);
+    padding: var(--card-padding);
+  }
+
+  /* Segundo escalón, para la tarjeta apoyada sobre otra tarjeta, donde
+     blanco sobre blanco desaparecería. Va teñido de rosa y no en Haze
+     neutro: sobre un lienzo cálido, un gris frío se lee sucio. */
+  .air-card--haze {
+    background-color: var(--color-surface-raised);
+  }
+
+  /* ── Glass Card ────────────────────────────────────────────────────────
+     Tarjeta translúcida que deja pasar el lavado del fondo — el gesto que
+     hace que las secciones respiren. Sin sombra: se separa por
+     transparencia y una hairline, no por elevación.
+
+     El relleno es BLANCO translúcido, al revés que en oscuro. Sobre un
+     lavado pastel, el blanco al 72% lo aclara lo justo para que la tarjeta
+     exista sin tapar del todo el color que tiene detrás. */
+  .air-card-glass {
+    background-color: rgb(var(--papel-rgb) / 0.72);
+    backdrop-filter: blur(20px) saturate(1.15);
+    -webkit-backdrop-filter: blur(20px) saturate(1.15);
+    border: 1px solid rgb(var(--tinta-rgb) / 0.12);
+    border-radius: var(--radius-cards);
+    color: var(--color-ink);
+    padding: var(--card-padding);
+  }
+
+  /* Sin soporte de backdrop-filter, el fallback es opaco para no perder
+     contraste del texto */
+  @supports not (backdrop-filter: blur(1px)) {
+    .air-card-glass {
+      background-color: rgb(var(--papel-rgb) / 0.96);
+    }
+  }
+
+  /* ── Tarjeta de vidrio sobre cielo ─────────────────────────────────────
+     El estilo de las tarjetas de precios de air.inc: relleno casi inexistente,
+     hairline clara y el cielo pasando por detrás. La tarjeta no se separa del
+     fondo por elevación —Air no usa sombras— sino por ser apenas más luminosa
+     y por el borde de 1px.
+
+     En oscuro el relleno tuvo que ser NEGRO translúcido: el vidrio claro de
+     la referencia aclaraba el cielo y le comía el contraste al texto
+     blanco. Acá el problema desaparece, porque el texto es tinta: el vidrio
+     BLANCO sobre un lavado pastel va en la misma dirección que el texto y
+     el contraste solo mejora — 14.8:1 en la tarjeta normal.
+
+     O sea que el tema claro puede usar el tratamiento de la referencia tal
+     cual, que en oscuro hubo que abandonar. La hairline pasa a Petal, el
+     rosa empolvado: sobre blanco, una hairline de tinta pura se leía dura
+     al lado del relleno translúcido. */
+  .air-card-air {
+    position: relative;
+    background-color: rgb(var(--papel-rgb) / 0.58);
+    backdrop-filter: blur(14px) saturate(1.1);
+    -webkit-backdrop-filter: blur(14px) saturate(1.1);
+    border: 1px solid var(--color-petal);
+    border-radius: var(--radius-xl);
+    color: var(--color-ink);
+    padding: var(--spacing-32) var(--card-padding);
+    transition:
+      background-color 260ms ease,
+      border-color 260ms ease;
+  }
+  .air-card-air:hover {
+    background-color: rgb(var(--papel-rgb) / 0.78);
+    border-color: var(--color-rosewood-soft);
+  }
+
+  /* Sin backdrop-filter el vidrio no existe: se cae a un relleno algo más
+     sólido para no perder el contraste del texto. */
+  @supports not (backdrop-filter: blur(1px)) {
+    .air-card-air {
+      background-color: rgb(var(--papel-rgb) / 0.9);
+    }
+  }
+
+  /* Tarjeta destacada: apenas más opaca que sus pares, nunca con color.
+     El borde sí sube a Rosewood Soft, que es línea y no relleno. */
+  .air-card-air--destacada {
+    background-color: rgb(var(--papel-rgb) / 0.76);
+    border-color: var(--color-rosewood-soft);
+  }
+
+  /* Badge flotante que monta sobre el borde superior, como el "Most Popular"
+     de la referencia. Espejado: píldora Ink con texto Canvas, porque sobre
+     una tarjeta de vidrio blanco una píldora blanca no se vería. */
+  .air-badge {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: var(--color-ink);
+    border-radius: var(--radius-pills);
+    color: var(--color-canvas);
+    font-family: var(--font-control);
+    font-size: 13px;
+    font-weight: var(--font-weight-medium);
+    line-height: 1.5;
+    padding: 5px 14px;
+    white-space: nowrap;
+  }
+
+  /* Título en cursiva grande, el gesto que define estas tarjetas */
+  .air-card-air__titulo {
+    font-family: var(--font-control-cursive);
+    font-style: italic;
+    font-weight: var(--font-weight-medium);
+    font-size: clamp(38px, 4.5vw, 52px);
+    line-height: 1;
+    color: var(--color-ink);
+  }
+
+  /* ── Marquesina de stack ───────────────────────────────────────────────
+     Dos filas de tecnologías corriendo en direcciones opuestas. Es la única
+     animación autónoma del sitio —todo lo demás reacciona al scroll— así que
+     va lenta y sin acentos: tiene que leerse como textura, no pedir atención.
+
+     El track lleva la lista duplicada y se desplaza exactamente -50%: al
+     llegar, la segunda copia está donde arrancó la primera y el ciclo
+     reinicia sin corte visible.
+  ---------------------------------------------------------------------- */
+  .air-marquee {
+    overflow: hidden;
+    /* Máscara, no relleno: desvanece los extremos para que las píldoras no
+       corten en seco contra el borde de la sección. Mismo criterio que la
+       grilla hairline — recorta, no simula profundidad. */
+    -webkit-mask-image: linear-gradient(
+      90deg,
+      transparent,
+      #000 7%,
+      #000 93%,
+      transparent
+    );
+    mask-image: linear-gradient(
+      90deg,
+      transparent,
+      #000 7%,
+      #000 93%,
+      transparent
+    );
+  }
+
+  .air-marquee__track {
+    display: flex;
+    width: max-content;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  /* La separación va en `margin` de cada ítem y no en `gap` del track a
+     propósito. Con `gap`, el ancho total es 2×copia + 1 hueco de empalme, y
+     ahí el -50% cae medio hueco corrido: el ciclo pega un salto de unos
+     pocos píxeles en cada vuelta. Con margen, cada copia incluye su propia
+     separación, el total es exactamente 2×copia y el empalme es invisible. */
+  .air-marquee__track > li {
+    margin-inline-end: var(--spacing-12);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .air-marquee__track {
+      animation: air-marquee 64s linear infinite;
+    }
+    .air-marquee__track--reverse {
+      animation-direction: reverse;
+    }
+    /* Se frena al pasar el mouse, para poder leer una tecnología concreta */
+    .air-marquee:hover .air-marquee__track {
+      animation-play-state: paused;
+    }
+  }
+
+  @keyframes air-marquee {
+    to {
+      transform: translateX(-50%);
+    }
+  }
+
+  /* Píldora de tecnología: hairline Petal sobre vidrio claro, el mismo
+     tratamiento que las tarjetas de Servicios. */
+  .air-chip {
+    display: inline-flex;
+    align-items: center;
+    white-space: nowrap;
+    background-color: rgb(var(--papel-rgb) / 0.62);
+    border: 1px solid var(--color-petal);
+    border-radius: var(--radius-pills);
+    color: var(--color-ink);
+    font-family: var(--font-control);
+    font-size: var(--text-caption);
+    font-weight: var(--font-weight-medium);
+    line-height: 1.5;
+    padding: 8px 16px;
+    transition:
+      background-color 200ms ease,
+      border-color 200ms ease;
+  }
+  .air-chip:hover {
+    background-color: rgb(var(--papel-rgb) / 0.85);
+    border-color: var(--color-rosewood-soft);
+  }
+
+  /* ── Image Card with Radius ────────────────────────────────────────── */
+  .air-image {
+    background-color: transparent;
+    border-radius: var(--radius-images);
+    overflow: hidden;
+  }
+
+  /* ── Text Input ────────────────────────────────────────────────────── */
+  .air-input {
+    width: 100%;
+    background-color: var(--color-surface);
+    border: 1px solid rgb(var(--tinta-rgb) / 0.2);
+    border-radius: var(--radius-inputs);
+    color: var(--color-ink);
+    font-family: var(--font-control);
+    font-size: var(--text-body);
+    font-weight: var(--font-weight-medium);
+    line-height: 1.5;
+    padding: 10px;
+    transition: border-color 200ms ease;
+  }
+  /* 4.61:1 — el placeholder es texto y también pasa AA. */
+  .air-input::placeholder {
+    color: rgb(var(--tinta-rgb) / 0.58);
+  }
+  .air-input:focus {
+    border-color: var(--color-ink);
+    outline: none;
+  }
+
+  /* ── Compressed Display Headline ───────────────────────────────────────
+     El display busca siempre la capa de mayor contraste contra su fondo.
+     Sobre lienzo negro eso era el blanco; sobre papel es la tinta. */
+  .air-display {
+    font-family: var(--font-control-compressed);
+    font-size: var(--text-display-fluid);
+    font-weight: var(--font-weight-black);
+    line-height: 0.85;
+    text-transform: uppercase;
+    color: var(--color-ink);
+    letter-spacing: -0.01em;
+  }
+
+  /* ── Acento cursivo dentro de un headline ──────────────────────────── */
+  .air-cursive {
+    font-family: var(--font-control-cursive);
+    font-style: italic;
+    font-weight: var(--font-weight-regular);
+    /* Caveat tiene una x-height chica: +0.18em la alinea ópticamente
+       con Inter al mismo tamaño nominal */
+    font-size: 1.18em;
+    line-height: 1;
+  }
+
+  /* ── Eyebrow / label de sección ────────────────────────────────────── */
+  .air-eyebrow {
+    font-family: var(--font-control);
+    font-size: var(--text-caption);
+    font-weight: var(--font-weight-medium);
+    line-height: 1.5;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    /* El eyebrow es donde el rosa aparece como TEXTO, y es el único lugar.
+       Por eso usa Rosewood (5.84:1) y no Rosewood Soft (4.19:1). */
+    color: var(--color-rosewood);
+  }
+
+  /* ── Logo — wordmark cursivo animado ───────────────────────────────────
+     El equivalente al script "Air": un monograma corto en Control Cursive,
+     no el nombre completo en la tipografía de interfaz. */
+  .air-logo {
+    display: inline-block;
+    font-family: var(--font-control-cursive);
+    font-size: 32px;
+    font-weight: var(--font-weight-medium);
+    line-height: 1;
+    letter-spacing: 0.01em;
+    text-decoration: none;
+    color: var(--color-ink);
+    padding-block: 4px;
+    transform-origin: left center;
+    transition:
+      transform 400ms cubic-bezier(0.22, 1, 0.36, 1),
+      color 300ms ease;
+    will-change: transform;
+  }
+  .air-logo:hover {
+    transform: scale(1.06) rotate(-2.5deg);
+  }
+
+  /* Entrada al cargar: las letras se dibujan de izquierda a derecha */
+  .js .air-logo {
+    animation: air-logo-in 900ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  @keyframes air-logo-in {
+    from {
+      opacity: 0;
+      transform: translateY(8px) rotate(-4deg);
+      clip-path: inset(0 100% 0 0);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+      clip-path: inset(0 -8% 0 0);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .js .air-logo {
+      animation: none;
+    }
+    .air-logo:hover {
+      transform: none;
+    }
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Atmósfera — Full-Bleed Photographic Section
+   Las texturas viven en /public/images/*.svg (feTurbulence, cielo diurno).
+   Para reemplazarlas por fotografía real: cambiá el background-image por la
+   ruta de tu .jpg. Nada más cambia.
+   ═══════════════════════════════════════════════════════════════════════════ */
+@layer components {
+  /* La foto vive en una capa propia (::before) y no en el background de la
+     sección. Así el parallax puede moverla con `transform` —que corre en el
+     compositor— en vez de animar `background-position`, que fuerza repaint
+     en cada frame. La capa se hace más alta que la sección para que al
+     desplazarse no descubra el borde. */
+  .air-bleed {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+  }
+  .air-bleed::before {
+    content: '';
+    position: absolute;
+    inset: -12% 0;
+    z-index: -2;
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+    transform: translate3d(0, var(--parallax, 0px), 0);
+    will-change: transform;
+  }
+
+  /* Capa suelta que deriva a otra velocidad que el fondo — la usa la
+     escultura de vidrio sobre el poster. */
+  .air-drift {
+    transform: translate3d(0, var(--parallax, 0px), 0);
+    will-change: transform;
+    pointer-events: none;
+  }
+  .air-bleed > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ── Lavado pastel de sección ──────────────────────────────────────────
+     La pieza sobrevivió a dos temas: era un amanecer, después un cielo
+     nocturno, y ahora es un lavado rosa/durazno. Conserva lo único que
+     siempre fue suyo —una curva de color sostenida que se calienta hacia
+     el final— y cambia la hora del día, no el dibujo.
+
+     El color lo pone un degradado CSS y no una foto, así las paradas se
+     afinan al píxel según lo que mida el contraste.
+
+     Ya no lleva la capa de nubes. El SVG es de nubes blancas: sobre estos
+     pasteles casi blancos no aporta masa, solo ensucia el degradado. Era
+     útil cuando el fondo era índigo profundo.
+
+     Contraste: el texto es tinta, así que el peor caso es la parada MÁS
+     OSCURA, al revés que en el tema oscuro. Esa es el durazno del final
+     (#f7ddc8), y ahí la tinta mide 13.4:1. Todo el recorrido pasa AAA con
+     margen — el tema claro con pasteles muy lavados le saca presión al
+     contraste, igual que se la había sacado el oscuro. */
+  .air-pastel {
+    background-color: var(--color-blush);
+  }
+  .air-pastel::before {
+    background-image: linear-gradient(
+      to bottom,
+      var(--color-canvas) 0%,
+      color-mix(in oklab, var(--color-blush) 62%, var(--color-canvas)) 30%,
+      var(--color-blush) 58%,
+      color-mix(in oklab, var(--color-peach) 74%, var(--color-canvas)) 78%,
+      var(--color-peach) 90%,
+      color-mix(in oklab, var(--color-peach) 74%, var(--color-petal)) 100%
+    );
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+    background-position: center;
+  }
+
+  /* Variante plana: se queda en la banda rosa y no llega al durazno.
+     La usa Servicios, donde hay tarjetas repartidas por toda la altura de
+     la sección y el vidrio blanco tiene que apoyarse sobre el mismo valor
+     arriba que abajo. */
+  .air-pastel--flat::before {
+    background-image: linear-gradient(
+      to bottom,
+      color-mix(in oklab, var(--color-blush) 34%, var(--color-canvas)) 0%,
+      var(--color-blush) 52%,
+      color-mix(in oklab, var(--color-blush) 92%, var(--color-canvas)) 100%
+    );
+  }
+
+  /* Variante del poster: el durazno sube más y se satura, porque ahí el
+     texto es display de 259px y le alcanza con 3:1. */
+  .air-pastel--warm::before {
+    background-image: linear-gradient(
+      to bottom,
+      var(--color-canvas) 0%,
+      color-mix(in oklab, var(--color-blush) 70%, var(--color-canvas)) 38%,
+      color-mix(in oklab, var(--color-blush) 88%, var(--color-petal)) 66%,
+      color-mix(in oklab, var(--color-peach) 82%, var(--color-petal)) 86%,
+      color-mix(in oklab, var(--color-peach) 70%, var(--color-petal)) 100%
+    );
+  }
+
+  /* Separador que no corta la página de lado a lado: la línea se apaga
+     hacia los bordes, así el footer se despega del contenido sin dibujar un
+     borde duro sobre el fondo único. */
+  .air-hairline-top {
+    position: relative;
+  }
+  .air-hairline-top::after {
+    content: '';
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 1px;
+    background-color: rgb(var(--tinta-rgb) / 0.14);
+    -webkit-mask-image: linear-gradient(
+      to right,
+      transparent 0%,
+      #000 22%,
+      #000 78%,
+      transparent 100%
+    );
+    mask-image: linear-gradient(
+      to right,
+      transparent 0%,
+      #000 22%,
+      #000 78%,
+      transparent 100%
+    );
+  }
+
+  /* ── Grilla hairline ───────────────────────────────────────────────────
+     Reemplaza a la fotografía de cielo en las secciones grandes. Es línea,
+     no relleno: estos `linear-gradient` tienen paradas duras y dibujan trazos
+     de 1px, que es la técnica estándar para una grilla en CSS. No contradice
+     el "sin gradientes" del sistema, que apunta a no simular profundidad con
+     degradados de color.
+
+     Vive en la capa ::before, así que hereda el parallax: la grilla deriva
+     lento y da profundidad sin una sola imagen. */
+  .air-grid {
+    background-color: transparent;
+  }
+  .air-grid::before {
+    background-image:
+      linear-gradient(to right, rgb(var(--tinta-rgb) / 0.06) 1px, transparent 1px),
+      linear-gradient(to bottom, rgb(var(--tinta-rgb) / 0.06) 1px, transparent 1px);
+    background-size: 64px 64px;
+    background-position: center;
+    /* La regla base de .air-bleed::before trae `no-repeat` porque estaba
+       pensada para una foto. Una grilla necesita repetirse: sin esto se
+       dibuja una sola celda suelta en el medio de la sección. */
+    background-repeat: repeat;
+  }
+
+  /* Celda más grande, para que el display de 259px del poster no compita
+     con la trama. */
+  .air-grid--wide {
+    background-color: transparent;
+  }
+  .air-grid--wide::before {
+    background-image:
+      linear-gradient(to right, rgb(var(--tinta-rgb) / 0.05) 1px, transparent 1px),
+      linear-gradient(to bottom, rgb(var(--tinta-rgb) / 0.05) 1px, transparent 1px);
+    background-size: 132px 132px;
+    background-position: center;
+    background-repeat: repeat;
+  }
+
+  /* Puntos en vez de líneas: varía la textura entre secciones sin cambiar
+     de vocabulario. */
+  /* Sin color propio: es textura sobre el fondo único de la página, no una
+     banda con su propio negro. */
+  .air-dots {
+    background-color: transparent;
+  }
+  .air-dots::before {
+    background-image: radial-gradient(
+      circle,
+      rgb(var(--tinta-rgb) / 0.1) 1px,
+      transparent 1.5px
+    );
+    background-size: 26px 26px;
+    background-position: center;
+    background-repeat: repeat;
+  }
+
+  /* Se desvanece hacia los bordes para no cortar en seco contra la sección
+     siguiente. */
+  .air-grid::before,
+  .air-grid--wide::before,
+  .air-dots::before {
+    -webkit-mask-image: radial-gradient(ellipse 128% 92% at 50% 45%, #000 58%, transparent 100%);
+    mask-image: radial-gradient(ellipse 128% 92% at 50% 45%, #000 58%, transparent 100%);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Parallax — el cielo se desplaza más lento que el contenido
+   Lo mueve un solo rAF sobre transform (compositor). Si el usuario pidió
+   menos movimiento, la capa nunca se toca.
+   ═══════════════════════════════════════════════════════════════════════════ */
+@layer utilities {
+  @media (prefers-reduced-motion: reduce) {
+    .air-bleed::before {
+      transform: none !important;
+    }
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Reveal on scroll — progresivo: sin JS todo queda visible
+   ═══════════════════════════════════════════════════════════════════════════ */
+@layer utilities {
+  /* El recorrido es más largo que antes (28px en vez de 16, 900ms en vez de
+     700) y cada bloque de una misma sección entra apenas después del
+     anterior (--reveal-delay, que pone el observer). Así una sección no
+     aparece de golpe: se va armando mientras la anterior todavía está en
+     pantalla, y el scroll se lee como una sola pieza continua. */
+  .js .air-reveal {
+    opacity: 0;
+    transform: translateY(28px);
+    transition:
+      opacity 900ms cubic-bezier(0.22, 1, 0.36, 1),
+      transform 900ms cubic-bezier(0.22, 1, 0.36, 1);
+    transition-delay: var(--reveal-delay, 0ms);
+  }
+  .js .air-reveal.is-visible {
+    opacity: 1;
+    transform: none;
+  }
+}

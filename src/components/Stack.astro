@@ -1,0 +1,61 @@
+---
+import { skills } from '../data/site';
+
+/**
+ * Stack técnico — dos marquesinas cruzadas.
+ *
+ * Vivía dentro de Servicios y pasó a ser sección propia, debajo de
+ * Proyectos: después de ver qué construiste, la pregunta que sigue es con
+ * qué, y la respuesta tiene que estar ahí y no tres secciones más abajo.
+ *
+ * ── Por qué en movimiento y no en grilla ─────────────────────────────────
+ *
+ * El stack es una lista larga y sin jerarquía: treinta nombres donde
+ * ninguno importa más que otro. En grilla obliga a leerla celda por celda,
+ * como si hubiera un orden. Desfilando se lee de un vistazo, como textura, y
+ * ocupa un tercio del alto.
+ *
+ * ── El duplicado no es un error ──────────────────────────────────────────
+ *
+ * Cada fila se renderiza dos veces porque la animación se apoya en eso: se
+ * desplaza -50%, o sea el ancho exacto de una copia, y el ciclo cierra sin
+ * costura. Si sacás el duplicado, la marquesina deja un hueco al reiniciar.
+ * La segunda copia va `aria-hidden` para que un lector de pantalla no lea
+ * treinta tecnologías dos veces seguidas.
+ */
+---
+
+<section
+  id="stack"
+  class="pb-[var(--section-pad)] md:pb-[var(--section-pad-lg)]"
+>
+  <div class="air-container flex flex-col gap-6">
+    <h2 class="air-reveal air-eyebrow text-center">{skills.eyebrow}</h2>
+
+    <div class="air-reveal -mx-[var(--spacing-24)] flex flex-col gap-3">
+      <div class="air-marquee">
+        <ul class="air-marquee__track">
+          {
+            [...skills.ecommerce, ...skills.ecommerce].map((skill, i) => (
+              <li aria-hidden={i >= skills.ecommerce.length ? 'true' : undefined}>
+                <span class="air-chip">{skill}</span>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+
+      <div class="air-marquee">
+        <ul class="air-marquee__track air-marquee__track--reverse">
+          {
+            [...skills.web, ...skills.web].map((skill, i) => (
+              <li aria-hidden={i >= skills.web.length ? 'true' : undefined}>
+                <span class="air-chip">{skill}</span>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>

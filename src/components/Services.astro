@@ -1,0 +1,320 @@
+---
+import { services, support } from '../data/site';
+import SectionHeader from './ui/SectionHeader.astro';
+
+/**
+ * Servicios — tarjetas de vidrio sobre el lavado pastel, al estilo de las
+ * tarjetas de precios de air.inc: relleno casi inexistente, hairline Petal,
+ * título en cursiva grande y CTA ghost.
+ *
+ * Con el tema claro estas tarjetas quedaron más cerca de la referencia que
+ * antes: en oscuro el vidrio tuvo que ser negro para no comerle contraste
+ * al texto blanco, y acá el vidrio blanco de air.inc funciona tal cual,
+ * porque el texto es tinta y el relleno claro lo favorece.
+ */
+---
+
+<section
+  id="servicios"
+  class="air-bleed py-[var(--section-pad)] md:py-[var(--section-pad-lg)]"
+  data-parallax="0.04"
+>
+  <div class="air-container flex flex-col gap-[var(--section-gap)]">
+    <SectionHeader
+      eyebrow="Servicios"
+      before="En qué te puedo"
+      cursive="ayudar"
+      after="."
+      subtitle="Cuatro formas de trabajar juntos, según en qué punto esté tu proyecto."
+      tone="white"
+      reveal
+    />
+
+    {/* ── Las tarjetas ───────────────────────────────────────────────────
+        Anatomía tomada de la referencia que pasó Tatiana: el número entre
+        paréntesis arriba, el ícono debajo, y el título con su descripción
+        anclados al pie. El aire del medio no es un descuido: es lo que hace
+        que la tarjeta se lea como un afiche y no como un párrafo con borde.
+
+        Se fueron los tres "Hablemos". Repetir el mismo botón tres veces no
+        triplica las chances de que alguien lo toque: le saca peso. La
+        sección ya termina en el botón de Soporte y desemboca en Contacto,
+        que es la sección siguiente.
+
+        Sin carrusel a propósito: son tres tarjetas y entran las tres. Un
+        carrusel acá sería una flecha que no tiene a dónde ir, más una
+        librería de scroll y una isla de React. En pantallas chicas la fila
+        se vuelve un carril con scroll-snap, que es lo mismo pero nativo.
+    ------------------------------------------------------------------- */}
+    <ul class="servicios">
+      {
+        services.map((service, i) => (
+          <li
+            class:list={['air-reveal servicios__carta', service.destacado && 'es-destacada']}
+            style={`--i: ${i}`}
+          >
+            {service.destacado && <span class="air-badge servicios__badge">{service.destacado}</span>}
+
+            <p class="servicios__num">( {String(i + 1).padStart(3, '0')} )</p>
+
+            {/* Los íconos van en SVG acá adentro y no con lucide-react: son
+                tres dibujos fijos, y traerlos de una librería de React
+                obligaría a hidratar una isla entera para pintar tres formas
+                que nunca cambian. `currentColor` los deja seguir al tema. */}
+            <svg class="servicios__icono" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+              {i === 0 && (
+                <>
+                  <path d="M4 7.5 12 4l8 3.5V19a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1Z" />
+                  <path d="M9 20v-6h6v6" />
+                </>
+              )}
+              {i === 1 && (
+                <>
+                  <path d="m8 7-5 5 5 5" />
+                  <path d="m16 7 5 5-5 5" />
+                  <path d="m13.5 4-3 16" />
+                </>
+              )}
+              {i === 2 && (
+                <>
+                  <circle cx="12" cy="12" r="8.5" />
+                  <path d="M12 7v5l3.5 2.5" />
+                </>
+              )}
+            </svg>
+
+            <div class="servicios__pie">
+              <h3 class="servicios__titulo">{service.title}</h3>
+              <p class="servicios__lead">{service.lead}</p>
+              <p class="servicios__nota">{service.note}</p>
+              <p class="servicios__body">{service.body}</p>
+            </div>
+          </li>
+        ))
+      }
+    </ul>
+
+    {/* ── Soporte ────────────────────────────────────────────────────────
+        El día a día sobre tiendas que ya están andando. No es una cuarta
+        tarjeta de vidrio a propósito: esas tres son formas de empezar un
+        proyecto, y esto es trabajo continuo. Va como lista dentro de una
+        sola tarjeta, más liviana y más rápida de escanear.
+    ------------------------------------------------------------------- */}
+    <div class="flex flex-col gap-8 pt-4">
+      <p class="air-reveal servicios__detalle-label">{support.eyebrow}</p>
+
+      <div class="air-reveal air-card-air">
+        <ul class="grid gap-x-10 gap-y-6 md:grid-cols-2">
+          {
+            support.items.map((item) => (
+              <li class="flex gap-3">
+                <span
+                  class="mt-3 h-px w-4 shrink-0 bg-ink/40"
+                  aria-hidden="true"
+                />
+                <div class="flex flex-col gap-1">
+                  <p class="text-body font-medium text-ink">{item.title}</p>
+                  <p class="text-caption font-normal text-ink/85">
+                    {item.body}
+                  </p>
+                </div>
+              </li>
+            ))
+          }
+        </ul>
+
+        <div class="flex flex-col items-center gap-3 pt-8 text-center">
+          <p class="text-caption font-normal text-ink/85">{support.nota}</p>
+          <a href="#contacto" class="air-btn-ghost air-btn-ghost--on-sky">
+            Hablemos
+          </a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<style>
+  /* ── La fila ───────────────────────────────────────────────────────────
+     Tres columnas iguales en escritorio. En pantallas chicas no se apilan
+     en una torre de tres afiches altos —serían tres pantallas de scroll
+     para leer tres ideas—: la fila se vuelve un carril con scroll-snap.
+     Es el carrusel de la referencia, pero nativo: sin librería, sin isla de
+     React y con el gesto del dedo que el sistema operativo ya conoce. */
+  .servicios {
+    display: grid;
+    gap: var(--spacing-24, 1.5rem);
+    margin: 0;
+    padding: var(--spacing-16, 1rem) 0 0;
+    list-style: none;
+  }
+  /* Dos columnas antes de las cuatro: con la tarjeta de Soporte son cuatro
+     afiches altos, y cuatro en fila por debajo de 1024px dejan cada uno del
+     ancho de una columna de texto. */
+  @media (min-width: 768px) {
+    .servicios {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @media (min-width: 1024px) {
+    .servicios {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: var(--spacing-16, 1rem);
+    }
+  }
+  @media (max-width: 767px) {
+    .servicios {
+      grid-auto-flow: column;
+      grid-auto-columns: 82%;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      /* El sangrado hasta el borde: la tarjeta siguiente asoma, que es lo
+         que le avisa a alguien que hay más a la derecha. Sin esto el carril
+         parece una tarjeta suelta y nadie desliza. */
+      margin-inline: calc(var(--spacing-24, 1.5rem) * -1);
+      padding-inline: var(--spacing-24, 1.5rem);
+      scrollbar-width: none;
+    }
+    .servicios::-webkit-scrollbar {
+      display: none;
+    }
+    .servicios__carta {
+      scroll-snap-align: center;
+    }
+  }
+
+  /* ── La tarjeta ────────────────────────────────────────────────────────
+     Alta y con el contenido empujado a los extremos: el número arriba, el
+     pie abajo, y aire en el medio. Ese aire es la pieza que hace que se lea
+     como afiche.
+
+     El color sale de mezclar un tinte del tema con la superficie, nunca de
+     un color escrito a mano. Por eso las tres siguen funcionando cuando
+     cambiás de clima: de día son rosa, durazno y arcilla; de noche son tres
+     azules que se separan igual entre sí. Un `from-purple-100` como el de
+     la referencia habría quedado violeta sobre el tema noche. */
+  .servicios__carta {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: clamp(19rem, 30vw, 25rem);
+    padding: clamp(1.5rem, 2.4vw, 2rem);
+    border-radius: var(--radius-cards);
+    /* El `var(--tinte, ...)` con respaldo no es decorativo: sin él, una
+       tarjeta sin tinte asignado deja el `color-mix()` inválido y el fondo
+       se cae a transparente. Pasó al agregar la cuarta. Con el respaldo, una
+       quinta se vería rara pero se vería. */
+    background-color: color-mix(
+      in oklab,
+      var(--tinte, var(--color-petal)) var(--mezcla, 55%),
+      var(--color-surface)
+    );
+    box-shadow: 0 0 0 1px
+      color-mix(in oklab, var(--tinte, var(--color-petal)) 70%, transparent);
+    /* Sin `transition` a propósito. El fondo es un `color-mix()` que depende
+       del tema, y Chrome no sabe interpolar eso: la transición se queda con
+       el color del clima anterior y no lo suelta. Estas tres cambian de
+       golpe al cambiar de tema, que es preferible a que no cambien. */
+  }
+  .servicios__carta:nth-child(1) {
+    --tinte: var(--hero-blush);
+  }
+  .servicios__carta:nth-child(2) {
+    --tinte: var(--hero-peach);
+  }
+  .servicios__carta:nth-child(3) {
+    --tinte: var(--color-petal);
+  }
+  /* La cuarta usa el tinte más saturado de la paleta, así que se rebaja la
+     mezcla para que quede en el mismo rango de claridad que las otras tres.
+     Si fuera al 55% como el resto, Soporte pesaría más que Shopify, que es
+     justo al revés de lo que dice el badge. */
+  .servicios__carta:nth-child(4) {
+    --tinte: var(--hero-rose-line);
+    --mezcla: 32%;
+  }
+
+  /* La destacada se marca con el trazo, no con otro color: si además
+     cambiara de tinte se perdería la serie de tres. */
+  .servicios__carta.es-destacada {
+    box-shadow: 0 0 0 1.5px var(--color-rosewood);
+  }
+  .servicios__badge {
+    top: 0;
+    left: clamp(1.5rem, 2.4vw, 2rem);
+    transform: translateY(-50%);
+  }
+
+  .servicios__num {
+    margin: 0 0 1.75rem;
+    font-family: var(--font-hero-mono);
+    font-size: 0.6875rem;
+    letter-spacing: 0.14em;
+    color: color-mix(in srgb, var(--color-ink) 55%, transparent);
+  }
+
+  .servicios__icono {
+    width: 2.75rem;
+    height: 2.75rem;
+    /* `margin-bottom: auto` es lo que empuja el pie al fondo y abre el aire
+       del medio sin fijar un alto a mano. */
+    margin-bottom: auto;
+    color: var(--color-ink);
+  }
+
+  .servicios__pie {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    padding-top: 2rem;
+  }
+
+  /* El título se queda en la cursiva del sistema y no en la mayúscula de la
+     referencia: es la voz de la marca, y es lo único de esta sección que
+     también aparece en el resto del sitio. */
+  .servicios__titulo {
+    margin: 0;
+    font-family: var(--font-control-cursive);
+    font-size: clamp(1.75rem, 2.6vw, 2.25rem);
+    font-weight: var(--font-weight-medium);
+    line-height: 1;
+    color: var(--color-ink);
+  }
+  .servicios__lead {
+    margin: 0.25rem 0 0;
+    font-size: var(--text-body);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-ink);
+  }
+  .servicios__nota {
+    margin: 0;
+    font-family: var(--font-hero-mono);
+    font-size: 0.6875rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: color-mix(in srgb, var(--color-ink) 60%, transparent);
+  }
+  /* Es una etiqueta, no un titular: ahí está toda la diferencia. Con el
+     titular grande que había antes, el bloque competía con "En qué te puedo
+     ayudar" y la sección parecía dos. En mono y en minúscula de cuerpo
+     chico, se lee como la letra chica de la tarjeta ( 004 ), que es lo que
+     es. */
+  .servicios__detalle-label {
+    margin: 0 0 1.25rem;
+    font-family: var(--font-hero-mono);
+    font-size: 0.6875rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-rosewood);
+  }
+
+  .servicios__body {
+    margin: 0.5rem 0 0;
+    font-size: var(--text-caption);
+    font-weight: 400;
+    line-height: 1.5;
+    color: color-mix(in srgb, var(--color-ink) 78%, transparent);
+  }
+</style>

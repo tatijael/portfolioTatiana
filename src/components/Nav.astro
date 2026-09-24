@@ -1,0 +1,270 @@
+---
+import { nav, site } from '../data/site';
+---
+
+<header
+  id="site-nav"
+  class="fixed inset-x-0 top-0 z-40 h-[var(--nav-height)] transition-colors duration-300"
+  data-nav
+  data-scrolled="false"
+>
+  <nav
+    class="air-container flex h-full items-center justify-between gap-6"
+    aria-label="Principal"
+  >
+    <a href="#top" class="air-logo" data-logo>
+      <span class="sr-only">{site.shortName} — ir al inicio</span>
+      <span aria-hidden="true" data-logo-mark>{site.logoMark}</span>
+    </a>
+
+    <div class="flex items-center gap-2">
+      <a href="#contacto" class="air-btn-ghost air-btn-ghost--on-sky hidden sm:inline-flex">
+        Trabajemos juntos
+      </a>
+
+      {/* Un solo botón para las ocho secciones, en todos los tamaños. La
+          tira horizontal se fue: ocho ítems a 16px de aire no se leían como
+          opciones, se leían como una tira de texto, y en 1024px apretaban
+          contra el logo. */}
+      <button
+        type="button"
+        class="air-btn-ghost air-btn-ghost--on-sky nav-menu"
+        aria-expanded="false"
+        aria-controls="nav-mobile"
+        data-nav-toggle
+      >
+        <span class="sr-only">Abrir menú de secciones</span>
+        <svg
+          class="nav-menu__icono"
+          width="16"
+          height="16"
+          viewBox="0 0 16 16"
+          fill="none"
+          aria-hidden="true"
+        >
+          {/* Dos trazos, no tres: el tercero es lo que convierte al icono en
+              "hamburguesa de teléfono". Con dos se lee como un menú y no
+              como un fallback de pantalla chica. */}
+          <path
+            d="M2 5.5h12M2 10.5h12"
+            stroke="currentColor"
+            stroke-width="1.5"
+            stroke-linecap="round"></path>
+        </svg>
+        <span aria-hidden="true">Menú</span>
+      </button>
+    </div>
+  </nav>
+
+  {/* El menú, para todos los tamaños. En dos columnas desde tablet: ocho
+      entradas en una sola columna obligan a recorrer una lista larga, y en
+      dos se abarcan de un vistazo. El orden se lee por COLUMNA —las cuatro
+      primeras a la izquierda— que es como está escrito en el DOM y como lo
+      recorre el teclado. */}
+  <div id="nav-mobile" class="air-container hidden pt-2" data-nav-panel hidden>
+    <ul class="nav-panel__lista grid gap-1 sm:grid-cols-2 sm:gap-x-8">
+      {
+        nav.map((item) => (
+          <li>
+            <a href={item.href} class="nav-panel__link" data-nav-link>
+              <span class="nav-panel__num" aria-hidden="true" />
+              {item.label}
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</header>
+
+<style>
+  /* La nav no cambia de color en todo el recorrido, y eso sigue siendo
+     mérito del fondo único: el sitio entero es papel, así que la tinta se
+     lee igual sobre el hero que sobre el footer. Al scrollear solo aparece
+     la barra esmerilada que la despega de lo que pasa por debajo.
+
+     El link va al 72% y no al 85%: sobre papel, una tinta apenas apagada ya
+     se lee como secundaria, mientras que sobre negro hacía falta más cuerpo
+     para no perderla. Mide 9.4:1, y el hover sube al 100%. */
+  /* Mientras la pieza de apertura está en pantalla, el logo de la nav no
+     existe: el "Tati" que se ve es el grande, viajando hacia acá. Cuando
+     llega, el script hace el relevo escribiendo `visibility` inline en los
+     dos elementos, y ese inline le gana a esta regla.
+
+     Esta regla cubre solo el tramo anterior: desde que el navegador pinta
+     la nav hasta que el script del wordmark corre por primera vez. Sin
+     ella, ahí se ven dos "Tati" durante un frame. */
+  :global(html.wordmark-activo) .air-logo {
+    visibility: hidden;
+  }
+
+  .nav-link {
+    color: rgb(var(--tinta-rgb) / 0.72);
+    text-decoration: none;
+    transition: color 200ms ease;
+  }
+  .nav-link:hover {
+    color: var(--color-ink);
+  }
+
+  /* Casi opaca y no translúcida: con menos opacidad el desenfoque arrastra
+     lo que pasa por debajo y la barra queda manchada. El problema es el
+     mismo en los tres temas; lo único que cambia es de qué color se ensucia. */
+  [data-nav][data-scrolled='true'] {
+    /* `rgb()` con canales y no `color-mix()`: la barra tiene
+       `transition-colors`, y una transición sobre un `color-mix()` que
+       depende del tema se queda con el color viejo para siempre. En
+       noche la nav quedaba blanca. */
+    background-color: rgb(var(--lienzo-rgb) / 0.88);
+    backdrop-filter: blur(12px) saturate(1.2);
+    -webkit-backdrop-filter: blur(12px) saturate(1.2);
+    border-bottom: 1px solid rgb(var(--tinta-rgb) / 0.1);
+  }
+
+  /* ── El botón de menú ─────────────────────────────────────────────────
+     Lleva la palabra "Menú" al lado del icono y no solo el icono: dos
+     trazos sueltos son un símbolo aprendido, no uno evidente, y acá no hay
+     una tira de links al lado que explique de qué se trata. La palabra
+     cuesta 40px y saca la duda. */
+  .nav-menu {
+    gap: 8px;
+  }
+  .nav-menu__icono {
+    flex: none;
+  }
+  /* Abierto, el botón se invierte: es el mismo gesto que usa el sistema
+     para marcar el estado activo de una píldora. Sin esto, con el panel
+     abierto nada indica cuál lo abrió. */
+  .nav-menu[aria-expanded='true'] {
+    background-color: var(--color-ink);
+    border-color: var(--color-ink);
+    color: var(--color-canvas);
+  }
+
+  /* ── El panel ─────────────────────────────────────────────────────────
+     Venía con `.air-card-glass`, el vidrio del sistema, y ahí se rompía:
+     ese vidrio está pensado para tarjetas que apoyan sobre el lavado de una
+     sección, donde da igual que se transparente un poco. Este panel cae
+     sobre CUALQUIER cosa —una foto, una tarjeta de proyecto, un texto— y a
+     esa opacidad los links se leían encima del contenido de atrás.
+
+     Así que va casi opaco. El `backdrop-filter` se queda igual, pero ahora
+     es un detalle y no la estructura: si el navegador no lo soporta, el
+     panel se sigue leyendo.
+
+     Va en `rgb()` con canales y no en `color-mix()` por la misma razón de
+     siempre en este proyecto: los colores que dependen del tema y viven en
+     algo que transiciona no pueden armarse con `color-mix()`. */
+  .nav-panel__lista {
+    margin: 0;
+    padding: 10px;
+    list-style: none;
+    border-radius: var(--radius-cards);
+    background-color: rgb(var(--papel-rgb) / 0.97);
+    box-shadow:
+      0 0 0 1px var(--color-petal),
+      0 24px 48px -28px rgb(0 0 0 / 0.45);
+    backdrop-filter: blur(12px);
+  }
+
+  /* ── Las entradas del panel ───────────────────────────────────────────
+     Renglones altos y con área de toque generosa: este panel ahora es la
+     ÚNICA forma de navegar el sitio, así que un objetivo chico de más se
+     paga en cada visita. */
+  .nav-panel__link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    border-radius: var(--radius-buttons);
+    color: var(--color-ink);
+    font-size: var(--text-body);
+    font-weight: var(--font-weight-medium);
+    text-decoration: none;
+    transition:
+      background-color 200ms ease,
+      padding-left 200ms ease;
+  }
+  .nav-panel__link:hover {
+    background-color: rgb(var(--tinta-rgb) / 0.05);
+    padding-left: 18px;
+  }
+
+  /* El punto de la izquierda: da un borde consistente donde apoyar la
+     mirada al recorrer la lista, que es lo que hace que ocho entradas se
+     escaneen en vez de leerse. Crece en hover. */
+  .nav-panel__num {
+    width: 5px;
+    height: 5px;
+    flex: none;
+    border-radius: var(--radius-pills);
+    background-color: var(--color-rosewood);
+    opacity: 0.45;
+    transition:
+      opacity 200ms ease,
+      transform 200ms ease;
+  }
+  .nav-panel__link:hover .nav-panel__num {
+    opacity: 1;
+    transform: scale(1.4);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .nav-panel__link,
+    .nav-panel__num {
+      transition: none;
+    }
+  }
+</style>
+
+<script>
+  const nav = document.querySelector<HTMLElement>('[data-nav]');
+  const toggle = document.querySelector<HTMLButtonElement>('[data-nav-toggle]');
+  const panel = document.querySelector<HTMLElement>('[data-nav-panel]');
+
+  if (nav) {
+    const onScroll = () => {
+      nav.dataset.scrolled = String(window.scrollY > 24);
+    };
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+  }
+
+  if (toggle && panel) {
+    const setOpen = (open: boolean) => {
+      toggle.setAttribute('aria-expanded', String(open));
+      panel.hidden = !open;
+      panel.classList.toggle('hidden', !open);
+    };
+
+    const abierto = () => toggle.getAttribute('aria-expanded') === 'true';
+
+    toggle.addEventListener('click', () => setOpen(!abierto()));
+
+    panel.querySelectorAll('[data-nav-link]').forEach((link) => {
+      link.addEventListener('click', () => setOpen(false));
+    });
+
+    // ── Las dos salidas que antes no hacían falta ───────────────────────
+    // Cuando esto era el menú de teléfono, se abría, se elegía y listo.
+    // Ahora es la única navegación del sitio y se abre sobre el contenido en
+    // cualquier pantalla, así que tiene que poder cerrarse sin elegir nada.
+    // Sin esto, alguien que lo abre por curiosidad se queda con el panel
+    // tapando lo que estaba leyendo.
+    document.addEventListener('keydown', (e) => {
+      if (e.key !== 'Escape' || !abierto()) return;
+      setOpen(false);
+      // El foco vuelve al botón: si se quedara en el panel recién cerrado,
+      // quien navega con teclado pierde el lugar.
+      toggle.focus();
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!abierto()) return;
+      const dentro = (e.target as HTMLElement).closest(
+        '[data-nav-panel], [data-nav-toggle]',
+      );
+      if (!dentro) setOpen(false);
+    });
+  }
+</script>

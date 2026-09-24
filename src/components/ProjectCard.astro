@@ -1,0 +1,102 @@
+---
+import type { Project } from '../data/site';
+
+interface Props {
+  project: Project;
+  featured?: boolean;
+  index: number;
+}
+
+const { project, featured = false, index } = Astro.props;
+
+// Sin captura todavía → tile atmosférico generado, en vez de un hueco vacío.
+// Cuando cargues `image` en site.ts, se usa la imagen real.
+const textures = [
+  '/images/sky-hero.jpg',
+  '/images/sky-poster.jpg',
+  '/images/sky-warm.jpg',
+];
+const texture = textures[index % textures.length];
+---
+
+<article
+  class:list={[
+    'air-reveal air-card flex flex-col gap-5',
+    featured && 'md:col-span-2 md:flex-row md:items-start md:gap-6',
+  ]}
+  data-category={project.category}
+>
+  <div
+    class:list={[
+      'air-image relative shrink-0 overflow-hidden',
+      featured ? 'md:w-1/2' : '',
+    ]}
+  >
+    {
+      project.image ? (
+        <img
+          src={project.image}
+          alt={`Captura del proyecto ${project.title}`}
+          loading="lazy"
+          decoding="async"
+          class="h-full w-full object-cover"
+          width="800"
+          height="500"
+        />
+      ) : (
+        /* Sin título encima: el nombre del proyecto ya está justo debajo, y
+           sobre fotografía de alto rango dinámico ningún color de texto llega
+           a AA en todas las zonas. Imagen pura. */
+        <div
+          class="aspect-[16/10] w-full bg-cover bg-center"
+          style={`background-image: url('${texture}')`}
+          aria-hidden="true"
+        ></div>
+      )
+    }
+  </div>
+
+  <div class="flex flex-1 flex-col gap-3">
+    <p class="flex items-center gap-2 text-caption font-medium text-ink/55">
+      <span>{project.year}</span>
+      <span aria-hidden="true">·</span>
+      <span>{project.category}</span>
+    </p>
+
+    <h3 class="type-xl-3 text-ink">{project.title}</h3>
+
+    <p class="text-body font-normal text-ink/80">{project.summary}</p>
+    <p class="text-caption font-normal text-ink/60">{project.detail}</p>
+
+    <p class="mt-auto pt-2 text-caption font-medium text-ink/65">
+      {project.stack.join(' · ')}
+    </p>
+
+    {
+      (project.live || project.repo) && (
+        <div class="flex flex-wrap items-center gap-4 pt-1">
+          {project.live && (
+            <a
+              href={project.live}
+              class="air-link"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Ver en vivo
+            </a>
+          )}
+          {project.repo && (
+            <a
+              href={project.repo}
+              class="air-link"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Código
+            </a>
+          )}
+        </div>
+      )
+    }
+  </div>
+</article>

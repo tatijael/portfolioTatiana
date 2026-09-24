@@ -1,0 +1,77 @@
+---
+/* ⚠️ DESMONTADO el 2026-09-21. No está en index.astro.
+ *
+ * La página termina en Contacto. El pie repetía la navegación entera y
+ * agregaba un copyright justo después del pedido de que te escriban, que es
+ * el peor momento para poner ruido.
+ *
+ * ⚠️ Se llevó consigo el ÚNICO link a GitHub que quedaba en el sitio: ya lo
+ * habíamos sacado de Contacto y de "Sobre mí". `socials` en site.ts sigue
+ * teniendo la entrada, pero hoy no se renderiza en ningún lado. Si querés
+ * GitHub de vuelta, el lugar natural es Contacto (vaciando el array
+ * `ocultosEnContacto` de Contact.astro).
+ */
+import { nav, site, socials } from '../data/site';
+
+const year = new Date().getFullYear();
+---
+
+<footer class="air-hairline-top py-16">
+  <div class="air-container flex flex-col gap-10">
+    <div class="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
+      <div class="flex flex-col gap-2">
+        <p class="font-control-cursive text-heading-fluid leading-none text-ink">
+          {site.logoMark}
+        </p>
+        <p class="text-body font-medium text-ink">{site.name}</p>
+        <p class="text-caption font-normal text-ink/55">{site.role}</p>
+        <p class="text-caption font-normal text-ink/55">{site.location}</p>
+      </div>
+
+      <nav class="flex flex-col gap-3" aria-label="Pie de página">
+        <p class="air-eyebrow">Navegación</p>
+        <ul class="flex flex-col gap-2">
+          {
+            nav.map((item) => (
+              <li>
+                <a
+                  href={item.href}
+                  class="type-sm text-ink/65 no-underline transition-colors duration-200 hover:text-ink"
+                >
+                  {item.label}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </nav>
+
+      <div class="flex flex-col gap-3">
+        <p class="air-eyebrow">Encontrame en</p>
+        <ul class="flex flex-col gap-2">
+          {
+            socials.map((s) => (
+              <li>
+                <a
+                  href={s.href}
+                  class="type-sm text-ink/65 no-underline transition-colors duration-200 hover:text-ink"
+                  target={s.href.startsWith('mailto:') ? undefined : '_blank'}
+                  rel={s.href.startsWith('mailto:') ? undefined : 'noopener noreferrer'}
+                >
+                  {s.label}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+    </div>
+
+    <div
+      class="flex flex-col gap-2 border-t border-ink/12 pt-6 text-caption font-normal text-ink/70 sm:flex-row sm:items-center sm:justify-between"
+    >
+      <p>© {year} {site.name}</p>
+      <p>Construido con Astro y Tailwind CSS.</p>
+    </div>
+  </div>
+</footer>

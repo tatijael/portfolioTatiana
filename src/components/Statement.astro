@@ -1,0 +1,36 @@
+---
+import { statement } from '../data/site';
+import { RevealText } from './react/RevealText.tsx';
+
+/**
+ * Compressed Display Headline — el momento poster del sitio.
+ * Sangra a los bordes del viewport, sin contenedor. Se usa una sola vez
+ * por página: su fuerza depende de ser único.
+ *
+ * Tres capas que se mueven a distinta velocidad al scrollear:
+ *   1. el lavado pastel (fondo, el más lento)
+ *   2. la escultura de vidrio (intermedia)
+ *   3. el texto (a velocidad de página)
+ *
+ * NOTA: hoy este componente no está montado en index.astro. Se mantiene al
+ * día con el tema para que vuelva a entrar sin arrastrar colores viejos.
+ */
+---
+
+<section
+  class="air-bleed air-pastel air-pastel--warm relative flex min-h-[80svh] flex-col items-center justify-center gap-8 py-24"
+  data-parallax="0.04"
+>
+  {/* RevealText (GSAP + SplitText), portado del storefront: parte la frase
+      en palabras y las levanta desde detrás de una máscara. Es el único lugar
+      donde vale el costo — el poster es el momento de mayor impacto. */}
+  <h2 class="air-display w-full px-4 text-center text-ink">
+    <RevealText text={statement.line} client:idle />
+  </h2>
+
+  <p
+    class="air-reveal air-container max-w-[52ch] text-center text-subheading font-normal text-ink"
+  >
+    {statement.caption}
+  </p>
+</section>

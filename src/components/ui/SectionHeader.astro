@@ -1,0 +1,87 @@
+---
+import DualHeadline from './DualHeadline.astro';
+import { RevealText } from '../react/RevealText.tsx';
+
+/**
+ * Feature Section Header — eyebrow + título dual-style + subtítulo,
+ * centrado, con 48px de aire arriba y abajo.
+ *
+ * `tone` decide si el bloque va sobre superficie clara (Ink) o sobre la zona
+ * azul del cielo (Whiteout).
+ */
+interface Props {
+  eyebrow?: string;
+  before?: string;
+  cursive: string;
+  after?: string;
+  subtitle?: string;
+  align?: 'center' | 'start';
+  tone?: 'ink' | 'white';
+  /** Revela el titular palabra por palabra al entrar en pantalla (GSAP). */
+  reveal?: boolean;
+}
+
+const {
+  eyebrow,
+  before,
+  cursive,
+  after,
+  subtitle,
+  align = 'center',
+  tone = 'ink',
+  reveal = false,
+}: Props = Astro.props;
+
+const alignClass =
+  align === 'center' ? 'items-center text-center' : 'items-start text-left';
+
+/**
+ * `tone` ya no elige color de texto: todo el sitio escribe en tinta sobre
+ * papel, así que el titular va en Ink siempre.
+ *
+ * El prop igual sigue haciendo algo, y por eso no lo saqué: sobre un lavado
+ * pastel la luminosidad del fondo varía a lo largo de la sección, y ahí el
+ * texto secundario necesita más cuerpo (85%) que sobre el lienzo parejo (70%).
+ *
+ * El eyebrow NO entra en esta cuenta y por eso quedó sin tono: es el único
+ * texto rosa del sistema (ver .air-eyebrow), y pisarlo con una tinta al 85%
+ * lo devolvía a gris. Es el bug que ya se había colado al migrar a oscuro,
+ * donde `tone="white"` le pisaba el Twilight Mist.
+ */
+const headlineTone = 'text-ink';
+const subtitleTone = tone === 'white' ? 'text-ink/85' : 'text-ink/70';
+---
+
+<header class={`air-reveal flex flex-col gap-4 ${alignClass}`}>
+  {
+    eyebrow && (
+      <p class="air-eyebrow">{eyebrow}</p>
+    )
+  }
+  {
+    reveal ? (
+      <RevealText client:idle>
+        <DualHeadline
+          before={before}
+          cursive={cursive}
+          after={after}
+          class={headlineTone}
+        />
+      </RevealText>
+    ) : (
+      <DualHeadline
+        before={before}
+        cursive={cursive}
+        after={after}
+        class={headlineTone}
+      />
+    )
+  }
+  {
+    subtitle && (
+      <p class:list={['max-w-[62ch] text-body font-normal', subtitleTone]}>
+        {subtitle}
+      </p>
+    )
+  }
+</header>

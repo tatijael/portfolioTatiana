@@ -1,0 +1,161 @@
+---
+import { perfil } from '../data/site';
+import DualHeadline from './ui/DualHeadline.astro';
+import { RevealText } from './react/RevealText';
+
+/**
+ * Perfil — "Lo que hago".
+ *
+ * Ocupa el lugar que dejó el hero. La pantalla de apertura dice quién es;
+ * esta sección dice qué hace, nombrando las herramientas dentro de oraciones
+ * que explican para qué sirve cada una.
+ *
+ * ── Por qué no es otra marquesina de fichas ──────────────────────────────
+ *
+ * Servicios ya tiene el stack como dos filas de chips que desfilan. Eso
+ * responde "¿qué sabe usar?" pero no "¿qué hace con eso?", y es la segunda
+ * pregunta la que decide una contratación. Por eso acá el stack va en prosa:
+ * el nombre de la herramienta no es el contenido, es la prueba.
+ *
+ * ── El resaltado ─────────────────────────────────────────────────────────
+ *
+ * Los nombres marcados con *asteriscos* en site.ts se resaltan y se les
+ * dibuja un subrayado de izquierda a derecha cuando el bloque entra en
+ * pantalla, en cascada. Es la animación que pidió el pedido, y es sobre el
+ * texto: no decora la sección, señala dónde mirar. El párrafo se lee igual
+ * con la animación apagada.
+ */
+
+/**
+ * Parte un texto en tramos, marcando cuáles van resaltados.
+ *
+ * `split` con un grupo de captura devuelve los separadores intercalados, así
+ * que los índices impares son siempre el contenido de los asteriscos. Se
+ * numeran aparte para poder escalonar el subrayado: cada término entra 90ms
+ * después del anterior, con un techo para que un párrafo largo no termine
+ * dibujando el último subrayado tres segundos tarde.
+ */
+function partir(texto: string) {
+  let n = -1;
+  return texto.split(/\*([^*]+)\*/g).map((tramo, i) => {
+    const destacado = i % 2 === 1;
+    if (destacado) n += 1;
+    return { texto: tramo, destacado, orden: destacado ? n : 0 };
+  });
+}
+---
+
+<section
+  id="perfil"
+  class="py-[var(--section-pad)] md:py-[var(--section-pad-lg)]"
+>
+  <div class="air-container flex flex-col gap-[var(--section-gap)]">
+    <div class="flex max-w-[52rem] flex-col gap-6">
+      <h2 class="air-reveal air-eyebrow">{perfil.eyebrow}</h2>
+
+      {/* Mismo revelado palabra por palabra que el resto de los titulares
+          del sitio: se hereda, no se inventa uno nuevo. */}
+      <RevealText client:idle>
+        <DualHeadline
+          before={perfil.headlineBefore}
+          cursive={perfil.cursive}
+          after={perfil.headlineAfter}
+          as="h3"
+        />
+      </RevealText>
+
+      <p class="air-reveal text-subheading font-normal text-balance text-ink/80">
+        {perfil.lead}
+      </p>
+    </div>
+
+    <div class="grid gap-6 md:grid-cols-3">
+      {
+        perfil.bloques.map((bloque) => (
+          <article class="air-reveal air-card air-card--haze flex flex-col gap-3">
+            <h4 class="text-caption font-medium tracking-wide text-rosewood">
+              {bloque.titulo}
+            </h4>
+            <p class="text-body font-normal text-ink/75">
+              {partir(bloque.texto).map((tramo) =>
+                /* El contenido del span va en la MISMA línea a propósito: un
+                   salto de línea acá se renderiza como un espacio dentro del
+                   resaltado, y el resultado es "Remix , y cuando…" con el
+                   espacio colgando antes de la coma. */
+                tramo.destacado ? (
+                  // prettier-ignore
+                  <span class="perfil__stack" style={`--orden: ${tramo.orden}`}>{tramo.texto}</span>
+                ) : (
+                  tramo.texto
+                ),
+              )}
+            </p>
+          </article>
+        ))
+      }
+    </div>
+
+    <p class="air-reveal text-caption font-normal text-ink/60">
+      {perfil.cierre}
+    </p>
+  </div>
+</section>
+
+<style>
+  /* ── El subrayado que se dibuja ────────────────────────────────────────
+     Es un degradado de fondo al que se le anima el ANCHO, no un `border` ni
+     un `text-decoration`: los dos últimos no se pueden animar de izquierda a
+     derecha, solo aparecer enteros.
+
+     Va anclado abajo a la izquierda y arranca en ancho cero; cuando el
+     bloque recibe `.is-visible` —la clase que pone el observador del
+     layout— crece hasta el 100%. Como el origen es la izquierda, el trazo
+     se dibuja en la dirección en que se lee. */
+  .perfil__stack {
+    color: var(--color-ink);
+    font-weight: var(--font-weight-medium);
+
+    background-image: linear-gradient(
+      to right,
+      var(--color-rosewood),
+      var(--color-rosewood)
+    );
+    background-repeat: no-repeat;
+    background-position: 0 100%;
+    background-size: 0% 2px;
+
+    /* Un pelo de aire para que el trazo no toque las colas de la letra. */
+    padding-bottom: 0.08em;
+  }
+
+  /* Sin JS no hay observador, así que el subrayado tiene que estar puesto
+     desde el vamos: el estado por defecto de esta regla es el final. */
+  :global(html:not(.js)) .perfil__stack {
+    background-size: 100% 2px;
+  }
+
+  :global(html.js) .perfil__stack {
+    transition: background-size 520ms cubic-bezier(0.22, 1, 0.36, 1);
+    /* El escalonado. `--orden` lo pone el markup a partir del índice del
+       término dentro de su párrafo. El techo de 6 evita que en un bloque
+       largo el último subrayado salga casi un segundo después que el
+       primero, que ya se leería como un retraso y no como una cascada.
+
+       Al delay se le suma el `--reveal-delay` del propio bloque, así los
+       subrayados nunca se adelantan a la entrada de la tarjeta. */
+    transition-delay: calc(
+      var(--reveal-delay, 0ms) + min(var(--orden), 6) * 90ms + 260ms
+    );
+  }
+
+  :global(html.js) .air-reveal.is-visible .perfil__stack {
+    background-size: 100% 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    :global(html.js) .perfil__stack {
+      transition: none;
+      background-size: 100% 2px;
+    }
+  }
+</style>

@@ -1,0 +1,47 @@
+---
+import { about } from '../data/site';
+import { ContainerScroll } from './react/ContainerScroll.tsx';
+---
+
+{/* La pantalla que se endereza al scrollear. Adentro va el retrato con la
+    presentación al lado: el marco es apaisado y la foto vertical, así que
+    comparten el espacio en dos columnas en vez de pelearse por el recorte.
+    El bloque vivía abajo, dentro de About; About se quedó con la experiencia.
+
+    Sin links sociales a propósito: acá eran una fuga. Se llevaban a alguien
+    fuera del sitio justo antes de Experiencia, Servicios y Contacto, que es
+    todo lo que falta para que escriba. Viven en el pie —que es donde uno los
+    busca— y LinkedIn además es un botón en Contacto. */}
+<section id="sobre-mi">
+  <ContainerScroll client:idle>
+    <div slot="titleComponent" class="flex flex-col items-center gap-3 pb-6">
+      <p class="air-eyebrow">{about.eyebrow}</p>
+      <h2 class="font-control-tnt text-heading-lg-fluid font-medium text-balance text-ink">
+        {about.headlineBefore}{' '}<span class="air-cursive">{about.cursive}</span
+        >{about.headlineAfter}
+      </h2>
+    </div>
+
+    <div class="grid h-full w-full grid-cols-1 md:grid-cols-[minmax(0,0.85fr)_1fr] md:grid-rows-1">
+      <div class="relative hidden h-full overflow-hidden md:block">
+        <img
+          src={about.portrait}
+          alt={about.portraitAlt}
+          loading="lazy"
+          decoding="async"
+          class="absolute inset-0 h-full w-full object-cover object-center"
+          width="600"
+          height="750"
+        />
+      </div>
+
+      <div class="flex h-full flex-col justify-center gap-4 overflow-y-auto p-6 md:p-10">
+        {
+          about.paragraphs.map((p) => (
+            <p class="max-w-[52ch] text-body font-normal text-ink/75">{p}</p>
+          ))
+        }
+      </div>
+    </div>
+  </ContainerScroll>
+</section>

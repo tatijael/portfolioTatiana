@@ -1,0 +1,537 @@
+---
+/* ⚠️ DESMONTADO el 2026-09-21. No está en index.astro.
+ *
+ * Presentaba el nombre y el rol, y desde que la pantalla de apertura
+ * (Wordmark) hace exactamente eso, era la segunda presentación seguida. Se
+ * sacó entero; sus dos botones se mudaron a la apertura y el <h1> pasó a
+ * vivir invisible en index.astro.
+ *
+ * Queda en el repo, no en la página: el párrafo de posicionamiento —"apps
+ * propias y las integraciones B2B que nadie quiere tocar"— es el mejor
+ * texto del sitio y todavía no vive en ningún otro lado. Si aparece un lugar
+ * para él, está acá. Los textos siguen en `hero` de site.ts.
+ */
+import { hero } from '../data/site';
+
+/* El retrato salió de acá. Vivía en un <ScrollSpin> que giraba con el
+   scroll, y se fue por una razón de material y no de diseño: la foto
+   (public/images/me.jpg) trae su propio fondo azul marino quemado en el
+   JPG. Sobre el hero negro eso no se notaba —la máscara radial apagaba
+   oscuro contra oscuro y quedaba una cara flotando— pero sobre papel
+   dejaba un recuadro azul que era el elemento más oscuro de toda la
+   página.
+
+   El retrato sigue estando en el sitio, en "Sobre mí": esa foto
+   (retrato.jpg) es clara y cálida y funciona con el tema nuevo sin tocarla.
+
+   Para devolverlo acá hace falta una foto con fondo transparente (PNG o
+   WebP) o con fondo claro. El componente ScrollSpin queda en
+   src/components/react/ por eso — no se borró, se desmontó. */
+---
+
+{/*
+  El hero previo a la fusión, ya pasado dos veces de tema. Conserva su
+  estructura —título a dos líneas, grilla partida 6/4, bloque de apoyo a la
+  derecha, retrato detrás del título— y perdió lo que dependía del negro.
+
+  QUÉ CAMBIÓ AL PASAR A CLARO
+
+  1. El CROMADO se fue. Era un degradado blanco→gris→blanco recortado contra
+     la letra: sobre papel, la mitad de sus paradas son más claras que el
+     fondo y el título se agujereaba. Ahora la letra es tinta plena y lo que
+     sobrevive del gesto es el barrido: la banda de brillo sigue cruzando el
+     título cada 7s, pero tiñe de rosa en vez de blanquear. Misma mecánica,
+     mismo ritmo, color invertido.
+
+  2. El HALO VIOLETA pasó a rubor rosa/durazno. Sobre negro, el violeta era
+     luz sumándose a la oscuridad. Sobre papel tiene que ser lo contrario
+     —color restándose del blanco— así que subió mucho de opacidad: al 28%
+     que tenía en oscuro, sobre blanco no se veía nada.
+
+  3. El RETRATO se fue. El motivo está arriba, en el frontmatter.
+
+  Y hay una cuarta cosa que no es de color: el hero ya no es lo primero que
+  se ve. Arriba de él va la pantalla de apertura con el nombre (Wordmark),
+  que tarda una pantalla de scroll en resolverse. Eso obligó a retener la
+  animación de entrada de este bloque; ver "Entrada", más abajo.
+
+  Sigue siendo la única sección que no habla el lenguaje Air, así que los
+  estilos viven acá adentro, scopeados por Astro, y no en global.css: no hay
+  ninguna clase que otra sección pueda tomar por accidente.
+
+  Debajo arranca Proyectos, que apoya sobre el mismo fondo único de la
+  página, así que el corte es invisible: el hero no necesita fondo propio
+  más allá del rubor.
+*/}
+<section id="top" class="hero">
+  <div class="hero__glow" aria-hidden="true"></div>
+
+  <div class="air-container hero__grid">
+    <div class="hero__title">
+      <p class="hero__tag hero__meta" style="--hero-delay: 0.55s">
+        {hero.eyebrow} <span class="hero__name">{hero.eyebrowName}</span>
+      </p>
+
+      {/* Cada línea se revela desde abajo detrás de su propia máscara. El
+          overflow del contenedor es lo que hace el efecto: sin él la letra
+          se vería subir desde fuera del renglón. */}
+      <h1 class="hero__headline">
+        <span class="hero__line"><span>{hero.line1}</span></span>
+        <span class="hero__line"><span>{hero.line2}</span></span>
+      </h1>
+    </div>
+
+    <div class="hero__aside">
+      <p class="hero__tag hero__meta" style="--hero-delay: 0.63s">{hero.asideTag}</p>
+      <p class="hero__aside-text hero__meta" style="--hero-delay: 0.71s">{hero.aside}</p>
+    </div>
+  </div>
+
+  <div class="air-container hero__foot">
+    <p class="hero__tag hero__meta" style="--hero-delay: 0.79s">
+      <span class="hero__hint-arrow" aria-hidden="true">{hero.scrollHint.charAt(0)}</span
+      >{hero.scrollHint.slice(1)}
+    </p>
+    <div class="hero__ctas hero__meta" style="--hero-delay: 0.87s">
+      <a href={hero.primaryCta.href} class="hero__pill hero__pill--solid">
+        {hero.primaryCta.label}
+      </a>
+      <a href={hero.secondaryCta.href} class="hero__pill">
+        {hero.secondaryCta.label}
+      </a>
+    </div>
+  </div>
+</section>
+
+<style>
+  .hero {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    min-height: 100svh;
+    padding-top: calc(var(--nav-height) + var(--spacing-32));
+    overflow: hidden;
+  }
+
+  /* Rubor colgado por encima del borde superior: lo que se ve es el cuarto
+     inferior del radial, que entra en la sección como color difuso y no
+     como mancha con contorno.
+
+     Dos radiales en vez de uno: el rosa arriba a la izquierda y el durazno
+     abajo a la derecha, corridos entre sí. Con uno solo y centrado, un
+     rubor sobre blanco se lee como un halo de lente; descentrados y de dos
+     temperaturas se lee como luz entrando de costado. */
+  .hero__glow {
+    position: absolute;
+    inset-inline: 0;
+    top: -18rem;
+    height: 42rem;
+    pointer-events: none;
+    /* El puntero lo corre apenas (lo escribe el script de más abajo) y la
+       respiración le cambia el brillo: la luz nunca queda del todo quieta. */
+    transform: translate3d(var(--glow-x, 0px), var(--glow-y, 0px), 0);
+    will-change: transform, opacity;
+    background:
+      radial-gradient(
+        46% 52% at 38% 46%,
+        color-mix(in srgb, var(--hero-blush) 90%, transparent) 0%,
+        color-mix(in srgb, var(--hero-blush) 42%, transparent) 45%,
+        transparent 74%
+      ),
+      radial-gradient(
+        44% 50% at 66% 58%,
+        color-mix(in srgb, var(--hero-peach) 78%, transparent) 0%,
+        color-mix(in srgb, var(--hero-peach) 34%, transparent) 48%,
+        transparent 76%
+      );
+  }
+
+  /* Vuelve a centrarse. Se apoyaba arriba porque centrado el título quedaba
+     a la altura de la cara del retrato y le pasaba por encima de los ojos.
+     Sin retrato ese conflicto no existe, y dejarlo arriba dejaba media
+     pantalla vacía debajo. */
+  .hero__grid {
+    position: relative;
+    z-index: 2;
+    flex: 1;
+    display: grid;
+    align-content: center;
+    gap: var(--spacing-32);
+    padding-bottom: clamp(16px, 6svh, 64px);
+  }
+
+  .hero__headline {
+    margin: 0;
+    font-family: var(--font-hero-display);
+    font-weight: 800;
+    font-stretch: 112%;
+    font-size: var(--text-hero);
+    line-height: 0.9;
+    letter-spacing: -0.02em;
+
+    /* Sigue siendo una excepción deliberada al "sin gradientes" de Air: esa
+       regla apunta a no simular profundidad en la UI, y esto es el
+       tratamiento de un display, no un control.
+
+       Van dos capas recortadas contra la tipografía por `background-clip`:
+       arriba la banda que barre las letras (ver hero-sheen), abajo la base.
+
+       La base ya no es cromada. El cromo necesitaba que sus paradas claras
+       fueran MÁS claras que el fondo, y sobre papel eso agujerea la letra.
+       Ahora es tinta con una variación mínima de temperatura —de un carbón
+       frío a uno apenas cálido y de vuelta—, que se lee como una sola
+       tinta y mide 15:1 en su parada más clara.
+
+       El barrido sí conserva el gesto, invertido: antes blanqueaba, ahora
+       tiñe de rosa. Rosewood Soft mide 4.19:1, por debajo de AA para texto
+       normal, pero esto es display de 5.5rem —el umbral es 3:1— y además
+       es transitorio: ninguna letra se queda rosa. */
+    background-image:
+      linear-gradient(
+        100deg,
+        transparent 42%,
+        color-mix(in srgb, var(--color-rosewood-soft) 92%, transparent) 50%,
+        transparent 58%
+      ),
+      linear-gradient(
+        177deg,
+        var(--color-ink) 6%,
+        var(--color-ink-soft) 54%,
+        var(--color-ink) 92%
+      );
+    background-size:
+      220% 100%,
+      100% 100%;
+    background-position:
+      -80% 0,
+      0 0;
+    background-repeat: no-repeat;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .hero__line {
+    display: block;
+    overflow: hidden;
+  }
+  .hero__line > span {
+    display: block;
+  }
+
+  .hero__tag {
+    margin: 0;
+    font-family: var(--font-hero-mono);
+    font-size: 0.6875rem;
+    letter-spacing: 0.12em;
+    color: var(--hero-mist);
+  }
+  .hero__title .hero__tag {
+    margin-bottom: var(--spacing-16);
+  }
+  .hero__name {
+    position: relative;
+    padding-bottom: 2px;
+    color: var(--color-ink);
+  }
+  /* Era un border-bottom fijo. Ahora es una línea que se dibuja de
+     izquierda a derecha cuando termina de entrar el eyebrow. */
+  .hero__name::after {
+    content: '';
+    position: absolute;
+    inset: auto 0 0 0;
+    height: 1px;
+    background: var(--hero-rose-line);
+    transform: scaleX(0);
+    transform-origin: left;
+  }
+  :global(html.js:not(.wordmark-activo)) .hero__name::after {
+    animation: hero-underline 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.9s forwards;
+  }
+  :global(html:not(.js)) .hero__name::after {
+    transform: none;
+  }
+
+  .hero__aside-text {
+    margin: var(--spacing-12) 0 0;
+    max-width: 34ch;
+    font-size: 0.875rem;
+    line-height: 1.6;
+    color: var(--hero-mist);
+  }
+
+  /* En mobile la fila no entra —el hint mide 22 caracteres y las dos
+     píldoras no achican— así que se apila. `column-reverse` deja las
+     píldoras arriba y el hint pegado al borde inferior, que es donde tiene
+     sentido leerlo. En desktop vuelve a ser la fila de siempre. */
+  .hero__foot {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column-reverse;
+    align-items: flex-start;
+    gap: var(--spacing-20);
+    padding-bottom: var(--spacing-32);
+  }
+
+  .hero__ctas {
+    display: flex;
+    gap: var(--spacing-12);
+  }
+
+  .hero__pill {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-8);
+    padding: 0.4rem 0.9rem;
+    border: 1px solid var(--hero-line);
+    border-radius: var(--radius-pills);
+    /* Sube del 3% al 72%: sobre negro alcanzaba con insinuar una superficie,
+       sobre el rubor hace falta tapar lo suficiente para que la píldora se
+       despegue del color que tiene detrás. */
+    background: rgb(var(--papel-rgb) / 0.72);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    font-size: 0.8125rem;
+    white-space: nowrap;
+    color: var(--color-ink);
+    text-decoration: none;
+    transition:
+      background-color 200ms ease,
+      border-color 200ms ease;
+  }
+  .hero__pill:hover {
+    border-color: var(--hero-rose-line);
+  }
+  /* El CTA primario del hero sigue la misma lógica que .air-btn-light: es
+     el de mayor contraste contra el fondo, y sobre papel eso es tinta. */
+  .hero__pill--solid {
+    background: var(--color-ink);
+    color: var(--color-canvas);
+    border-color: var(--color-ink);
+  }
+  .hero__pill--solid:hover {
+    background: var(--color-ink-soft);
+    border-color: var(--color-ink-soft);
+  }
+
+  /* ── Grilla partida ─────────────────────────────────────────────────────
+     6 columnas para el título, 4 pegadas a la derecha para el apoyo. La
+     banda vacía del medio es lo que hace que el título respire. */
+  @media (width >= 48rem) {
+    .hero {
+      padding-top: calc(var(--nav-height) + var(--spacing-48));
+    }
+    .hero__grid {
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      gap: var(--spacing-32);
+    }
+    .hero__title {
+      grid-column: span 7;
+    }
+    .hero__aside {
+      grid-column: 9 / span 4;
+      text-align: right;
+    }
+    .hero__aside-text {
+      margin-left: auto;
+    }
+    .hero__foot {
+      flex-direction: row;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: var(--spacing-16);
+    }
+  }
+
+  /* ── Entrada ────────────────────────────────────────────────────────────
+     El hero no usa `.air-reveal` como el resto del sitio, y por dos motivos
+     que siguen vigentes:
+
+     1. Es la primera sección de contenido; engancharla a un observer solo
+        agrega latencia.
+     2. El observer de Layout.astro descuenta un 12% del borde inferior, así
+        que el pie del hero —que se apoya justo ahí— nunca llegaba a contar
+        como visible y las píldoras se quedaban en opacity 0 hasta scrollear.
+
+     LO QUE CAMBIÓ: antes el hero estaba a la vista al abrir la página y la
+     entrada podía dispararse al cargar. Ahora arriba hay una pantalla de
+     apertura (Wordmark), así que al cargar el hero está una pantalla más
+     abajo: si la entrada corriera igual, se reproduciría entera sin que
+     nadie la vea y el hero aparecería ya armado.
+
+     Por eso el estado inicial (escondido) va bajo `html.js` —se aplica
+     siempre, no hay flash de contenido— pero la ANIMACIÓN espera a que el
+     wordmark suelte la clase `wordmark-activo`, cosa que hace cuando la
+     palabra ya recorrió el 40% del camino y el hero está entrando en
+     pantalla. Si no hay wordmark (sin JS, o con prefers-reduced-motion) la
+     clase nunca existe y la entrada corre al cargar, como antes.
+
+     Los tiempos replican la timeline de siempre: las dos líneas del título
+     primero, y el resto entrando encimado sobre el final de ellas. */
+  :global(html.js) .hero__line > span {
+    transform: translateY(105%);
+  }
+  :global(html.js:not(.wordmark-activo)) .hero__line > span {
+    animation: hero-line-in 1.05s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+  :global(html.js:not(.wordmark-activo)) .hero__line:nth-child(2) > span {
+    animation-delay: 0.09s;
+  }
+
+  @keyframes hero-line-in {
+    to {
+      transform: translateY(0);
+    }
+  }
+
+  :global(html.js) .hero__meta {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  :global(html.js:not(.wordmark-activo)) .hero__meta {
+    animation: hero-meta-in 0.7s cubic-bezier(0.22, 1, 0.36, 1)
+      var(--hero-delay, 0.55s) forwards;
+  }
+
+  @keyframes hero-meta-in {
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  /* ── El hero nunca queda del todo quieto ────────────────────────────────
+     Tres movimientos lentos y encimados, todos en propiedades que resuelve
+     el compositor (transform, opacity, background-position):
+
+       hero-sheen      un rosa que barre el título cada 7s
+       hero-glow       el rubor respira
+       hero-hint       la flecha del pie insinúa el scroll
+
+     Arrancan después de la entrada, para no competir con ella. */
+  :global(html.js) .hero__headline {
+    animation: hero-sheen 7s cubic-bezier(0.4, 0, 0.2, 1) 1.6s infinite;
+  }
+
+  @keyframes hero-sheen {
+    0% {
+      background-position:
+        -80% 0,
+        0 0;
+    }
+    32%,
+    100% {
+      background-position:
+        180% 0,
+        0 0;
+    }
+  }
+
+  :global(html.js) .hero__glow {
+    animation: hero-glow 9s ease-in-out 1s infinite alternate;
+  }
+
+  @keyframes hero-glow {
+    from {
+      opacity: 0.7;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  .hero__hint-arrow {
+    display: inline-block;
+  }
+  :global(html.js) .hero__hint-arrow {
+    animation: hero-hint 2.4s ease-in-out 1.6s infinite;
+  }
+
+  @keyframes hero-hint {
+    0%,
+    70%,
+    100% {
+      transform: translateY(0);
+      opacity: 0.75;
+    }
+    35% {
+      transform: translateY(4px);
+      opacity: 1;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    :global(html.js) .hero__line > span,
+    :global(html.js) .hero__meta {
+      opacity: 1;
+      transform: none;
+      animation: none;
+    }
+    /* Nada de movimiento perpetuo: el título se queda en tinta plena y el
+       rubor con su brillo. */
+    :global(html.js) .hero__headline,
+    :global(html.js) .hero__glow,
+    :global(html.js) .hero__hint-arrow {
+      animation: none;
+    }
+    :global(html.js) .hero__name::after {
+      animation: none;
+      transform: none;
+    }
+  }
+
+  @keyframes hero-underline {
+    to {
+      transform: scaleX(1);
+    }
+  }
+</style>
+
+<script>
+  // ── El hero reacciona al puntero ────────────────────────────────────────
+  // El rubor se corre unos pocos píxeles hacia donde está el mouse, y como
+  // el texto no se mueve, esa diferencia es la que separa las capas — sin
+  // agregar ni una sombra. Cuando había retrato, este script movía las dos
+  // capas a distinta velocidad; ahora la referencia quieta es el texto.
+  //
+  // Solo con mouse fino y solo si el usuario no pidió menos movimiento. Todo
+  // pasa por custom properties y un rAF: no se lee layout en el evento.
+  const hero = document.querySelector<HTMLElement>('.hero');
+  const quieto = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const punteroFino = window.matchMedia('(pointer: fine)').matches;
+
+  if (hero && !quieto && punteroFino) {
+    const glow = hero.querySelector<HTMLElement>('.hero__glow');
+    let x = 0;
+    let y = 0;
+    let pendiente = false;
+
+    const pintar = () => {
+      pendiente = false;
+      glow?.style.setProperty('--glow-x', `${x * 38}px`);
+      glow?.style.setProperty('--glow-y', `${y * 22}px`);
+    };
+
+    hero.addEventListener(
+      'pointermove',
+      (event) => {
+        const r = hero.getBoundingClientRect();
+        // -1 a 1 desde el centro del hero.
+        x = (event.clientX - r.left) / r.width - 0.5;
+        y = (event.clientY - r.top) / r.height - 0.5;
+        if (pendiente) return;
+        pendiente = true;
+        requestAnimationFrame(pintar);
+      },
+      { passive: true }
+    );
+
+    // Al salir, las capas vuelven a su lugar.
+    hero.addEventListener('pointerleave', () => {
+      x = 0;
+      y = 0;
+      requestAnimationFrame(pintar);
+    });
+  }
+</script>
