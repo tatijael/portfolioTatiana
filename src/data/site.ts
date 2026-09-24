@@ -154,7 +154,7 @@ export const statement = {
 export type Project = {
   title: string;
   year: string;
-  category: 'E-commerce' | 'Producto' | 'Web';
+  category: 'E-commerce' | 'Catálogo online' | 'Producto' | 'Web';
   summary: string;
   detail: string;
   stack: readonly string[];
