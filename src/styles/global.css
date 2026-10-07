@@ -1358,6 +1358,18 @@ html[data-tema='noche'] {
   }
 }
 
+/* La máscara de RevealText recorta cada palabra a su caja, y Caveat se sale
+   de la suya: la cola de la "g" baja de la línea y la cursiva inclinada
+   sobresale a la derecha. Sin este margen, "negocio" perdía el pie y
+   "e-commerce" la última letra. El padding agranda la ventana y el margen
+   negativo lo descuenta, así el texto no se mueve de lugar. */
+@layer utilities {
+  .split-word-mask {
+    padding: 0 0.2em 0.25em 0;
+    margin: 0 -0.2em -0.25em 0;
+  }
+}
+
 /* ═══════════════════════════════════════════════════════════════════════════
    Pantallas táctiles — aliviar Safari de iPhone
    En iOS el scroll corre en un hilo propio y todo lo que se mueve con él

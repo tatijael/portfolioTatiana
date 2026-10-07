@@ -25,9 +25,9 @@ import { nav, site } from '../data/site';
       {
         nav
           .filter((item) => item.href !== '#contacto')
-          .map((item) => (
+          .map((item, i) => (
             <li>
-              <a href={item.href} class="nav-link">
+              <a href={item.href} class="nav-link" style={`--n: ${i}`}>
                 {item.label}
               </a>
             </li>
@@ -36,7 +36,11 @@ import { nav, site } from '../data/site';
     </ul>
 
     <div class="flex items-center gap-2">
-      <a href="#contacto" class="air-btn-ghost air-btn-ghost--on-sky hidden sm:inline-flex">
+      <a
+        href="#contacto"
+        class="air-btn-ghost air-btn-ghost--on-sky nav-saluda hidden sm:inline-flex"
+        style={`--n: ${nav.length - 1}`}
+      >
         Trabajemos juntos
       </a>
 
@@ -44,7 +48,7 @@ import { nav, site } from '../data/site';
           hace de menú y el botón sería un segundo camino a lo mismo. */}
       <button
         type="button"
-        class="air-btn-ghost air-btn-ghost--on-sky nav-menu lg:hidden"
+        class="air-btn-ghost air-btn-ghost--on-sky nav-menu nav-saluda lg:hidden"
         aria-expanded="false"
         aria-controls="nav-mobile"
         data-nav-toggle
@@ -154,6 +158,50 @@ import { nav, site } from '../data/site';
   .nav-link:hover::after,
   .nav-link:focus-visible::after {
     transform: scaleX(1);
+  }
+
+  /* ── El saludo ────────────────────────────────────────────────────────
+     Cuando el nombre de la apertura aterriza en el logo, el resto de la nav
+     se anuncia: los links pasan en cascada, de izquierda a derecha, al
+     contraste pleno del tema y vuelven, y el botón cierra con un anillo
+     que se abre. Es la señal de que el menú ya está ahí para usarse.
+
+     `is-saludo` la pone y la saca el script del wordmark. Cada elemento
+     espera según su `--n`, que es su lugar en la fila. */
+  [data-nav] {
+    /* Los links viven en tinta al 72%; el saludo los lleva al extremo: la
+       tinta entera en los temas claros, blanco puro de noche. */
+    --saludo-color: var(--color-ink);
+  }
+  :global(html[data-tema='noche']) [data-nav] {
+    --saludo-color: #fff;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    [data-nav].is-saludo .nav-link {
+      animation: nav-saludo 1100ms ease-in-out both;
+      animation-delay: calc(var(--n, 0) * 70ms);
+    }
+    [data-nav].is-saludo .nav-saluda {
+      animation: nav-saludo-anillo 900ms ease-out both;
+      animation-delay: calc(var(--n, 0) * 70ms);
+    }
+  }
+  /* El color solo no alcanza: de 72% a 100% de la misma tinta casi no se
+     ve. El resplandor del mismo color es lo que hace que el link se lea
+     encendido, y no apenas más oscuro. */
+  @keyframes nav-saludo {
+    45% {
+      color: var(--saludo-color);
+      text-shadow: 0 0 12px color-mix(in srgb, var(--saludo-color) 55%, transparent);
+    }
+  }
+  @keyframes nav-saludo-anillo {
+    0% {
+      box-shadow: 0 0 0 0 rgb(var(--tinta-rgb) / 0.28);
+    }
+    100% {
+      box-shadow: 0 0 0 10px rgb(var(--tinta-rgb) / 0);
+    }
   }
 
   /* Casi opaca y no translúcida: con menos opacidad el desenfoque arrastra

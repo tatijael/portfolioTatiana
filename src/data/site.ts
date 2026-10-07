@@ -74,13 +74,10 @@ export const socials = [
    encontrar la última sección ahí.
 --------------------------------------------------------------------------- */
 export const nav = [
-  { label: 'Lo que hago', href: '#perfil' },
   { label: 'Proyectos', href: '#proyectos' },
   { label: 'Stack', href: '#stack' },
-  { label: 'Galería', href: '#galeria' },
   { label: 'Sobre mí', href: '#sobre-mi' },
-  { label: 'Experiencia', href: '#experiencia' },
-  { label: 'Servicios', href: '#servicios' },
+  { label: 'Galería', href: '#galeria' },
   { label: 'Contacto', href: '#contacto' },
 ] as const;
 
@@ -551,6 +548,24 @@ export const about = {
     'Trabajo cómoda en equipos colaborativos, haciendo de puente entre diseño, desarrollo y las personas que definen el producto. Me gusta entender el porqué antes de escribir la primera línea.',
     'Mi fortaleza es la resolución de problemas: identificar el cuello de botella real, no el síntoma, y resolverlo de forma que no vuelva a aparecer.',
   ],
+  /* La columna de al lado: el stack agrupado por área. No repite la
+     marquesina de `skills` —esa es textura, esta se lee— y por eso es corta:
+     solo lo que alguien busca con nombre propio al evaluar un perfil. */
+  stack: [
+    {
+      titulo: 'Shopify',
+      items: 'Shopify Plus, Liquid, Hydrogen, Shopify CLI, Checkout UI Extensions, Shopify Functions, Polaris, GraphQL',
+    },
+    {
+      titulo: 'Frontend',
+      items: 'JavaScript, TypeScript, React, Next.js, Astro, Sass, Tailwind',
+    },
+    { titulo: 'Backend', items: 'Node.js, Express, Prisma, Supabase, Docker' },
+    {
+      titulo: 'Integraciones',
+      items: 'Klaviyo, Cin7, Google Maps, Lighthouse y SEO técnico',
+    },
+  ],
   // Original de 5043×6225 (7 MB) reescalado a 972×1200 JPEG (246 KB).
   portrait: '/images/retrato.jpg',
   portraitAlt: 'Retrato de Tatiana Jael Saucedo',
@@ -565,6 +580,19 @@ export const about = {
  * preferible a un link que abre algo que no es un CV.
  */
 export const cvUrl: string | null = '/cv.pdf';
+
+/* ── Trayectoria ──────────────────────────────────────────────────────
+   La cabecera del bloque de experiencia y formación. En la página cada
+   puesto va en una línea —período, rol, empresa—; los bullets de abajo
+   quedan para el CV, que es donde se leen. */
+export const trayectoria = {
+  eyebrow: 'Trayectoria',
+  headlineBefore: 'Desde 2020 en',
+  cursive: 'e-commerce',
+  headlineAfter: '.',
+  subtitle:
+    'Entre agencias Shopify Experts y equipos de producto. El detalle completo está en el CV.',
+} as const;
 
 /* ── Experiencia ──────────────────────────────────────────────────────── */
 export const experience = [

@@ -4,12 +4,9 @@ import { site, hero } from '../data/site';
 import Nav from '../components/Nav.astro';
 import Wordmark from '../components/Wordmark.astro';
 import TemaSwitch from '../components/TemaSwitch.astro';
-import Perfil from '../components/Perfil.astro';
 import Projects from '../components/Projects.astro';
 import Stack from '../components/Stack.astro';
-import About from '../components/About.astro';
-import Services from '../components/Services.astro';
-import Showcase from '../components/Showcase.astro';
+import SobreMi from '../components/SobreMi.astro';
 import Gallery from '../components/Gallery.astro';
 import Contact from '../components/Contact.astro';
 ---
@@ -27,19 +24,17 @@ import Contact from '../components/Contact.astro';
       escalón.
 
         apertura     quién sos — nombre, rol y las dos acciones
-        Lo que hago  qué hacés, con nombres propios
         ── la prueba ──
         Proyectos    los casos. Va temprano a propósito: la evidencia
                      primero, la promesa después
         Stack        con qué los construiste, mientras están frescos
-        Galería      los fragmentos de esos mismos proyectos
         ── la persona ──
-        Sobre mí     recién acá. La bio arriba volvería el sitio sobre vos
-                     en vez de sobre el problema de quien lee
-        Experiencia  la trayectoria que respalda lo anterior
+        Sobre mí     recién después de la prueba. La bio arriba volvería el
+                     sitio sobre vos en vez de sobre el problema de quien lee.
+                     Lleva también la trayectoria: experiencia, formación
+                     e idiomas, una línea cada uno
+        Galería      los fragmentos de esos mismos proyectos
         ── el cierre ──
-        Servicios    la oferta, pegada al final: es el último paso antes
-                     de la acción, y nada tiene que enfriarlo
         Contacto     la acción, y el final de la página
 
       Sin pie: la página termina en Contacto a propósito. Un pie con un menú
@@ -67,13 +62,10 @@ import Contact from '../components/Contact.astro';
         nombre es un degradado recortado contra la letra. */}
     <h1 class="sr-only">{site.name} — {hero.wordmarkRole}</h1>
 
-    <Perfil />
     <Projects />
     <Stack />
+    <SobreMi />
     <Gallery />
-    <Showcase />
-    <About />
-    <Services />
     <Contact />
   </main>
 </Layout>

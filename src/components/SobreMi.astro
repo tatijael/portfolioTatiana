@@ -1,0 +1,224 @@
+---
+import { about, cvUrl, education, experience, languages, trayectoria } from '../data/site';
+import DualHeadline from './ui/DualHeadline.astro';
+import { RevealText } from './react/RevealText.tsx';
+
+/**
+ * Sobre mí y trayectoria, en una sola sección de dos bloques.
+ *
+ * Reemplaza a Showcase (la pantalla que se enderezaba con el retrato) y a
+ * About (la experiencia en tarjetas con todos los bullets). Los dos bloques
+ * comparten la misma grilla —cabecera a la izquierda, datos a la derecha—
+ * para que se lean como un solo recorrido: cómo trabajás, con qué, y dónde.
+ *
+ * La experiencia va en una línea por puesto. El detalle está en el CV, y el
+ * botón para bajarlo está al lado del título que lo promete.
+ *
+ * ── Animación ────────────────────────────────────────────────────────────
+ * La misma que el resto del sitio: los titulares suben palabra por palabra
+ * (RevealText, como SectionHeader con `reveal`) y cada pieza chica —un
+ * párrafo, un grupo del stack, una fila— es su propio `.air-reveal`, así la
+ * cascada del observer arma la sección de a poco en vez de en dos bloques.
+ * Las filas suman una cosa propia: el filete de abajo se dibuja de izquierda
+ * a derecha cuando la fila entra, como una línea de un índice.
+ */
+
+// "Remoto · Miami, USA" → "Remoto": en una línea alcanza con la modalidad.
+const modalidad = (place: string) =>
+  place.startsWith('Remoto') ? ' · Remoto' : '';
+---
+
+<section
+  id="sobre-mi"
+  class="py-[var(--section-pad)] md:py-[var(--section-pad-lg)]"
+>
+  <div class="air-container flex flex-col gap-[var(--section-pad)] md:gap-[var(--section-pad-lg)]">
+    <div class="sm-bloque">
+      <div class="flex flex-col gap-4">
+        <p class="air-reveal air-eyebrow">{about.eyebrow}</p>
+        <RevealText client:idle>
+          <DualHeadline
+            before={about.headlineBefore}
+            cursive={about.cursive}
+            after={about.headlineAfter}
+            class="text-ink"
+          />
+        </RevealText>
+        {
+          about.paragraphs.map((p) => (
+            <p class="air-reveal max-w-[52ch] text-body font-normal text-ink/75">{p}</p>
+          ))
+        }
+      </div>
+
+      <dl class="flex flex-col gap-5">
+        {
+          about.stack.map((g) => (
+            <div class="air-reveal flex flex-col gap-1.5">
+              <dt class="text-caption font-medium text-rosewood">{g.titulo}</dt>
+              <dd class="text-body font-normal text-ink/80">{g.items}</dd>
+            </div>
+          ))
+        }
+      </dl>
+    </div>
+
+    <div id="experiencia" class="sm-bloque">
+      <div class="flex flex-col items-start gap-4">
+        <p class="air-reveal air-eyebrow">{trayectoria.eyebrow}</p>
+        <RevealText client:idle>
+          <DualHeadline
+            before={trayectoria.headlineBefore}
+            cursive={trayectoria.cursive}
+            after={trayectoria.headlineAfter}
+            class="text-ink"
+          />
+        </RevealText>
+        <p class="air-reveal max-w-[52ch] text-body font-normal text-ink/75">{trayectoria.subtitle}</p>
+        {
+          cvUrl && (
+            <a href={cvUrl} class="air-reveal air-btn-light mt-2" download="Tatiana-Saucedo-CV.pdf">
+              Descargar CV ↓
+            </a>
+          )
+        }
+      </div>
+
+      <div class="flex flex-col gap-10">
+        <div>
+          <h3 class="air-reveal sm-linea sm-lista__titulo">Experiencia</h3>
+          <ol class="sm-lista">
+            {
+              experience.map((job) => (
+                <li class="air-reveal sm-linea sm-fila">
+                  <span class="sm-fila__periodo">{job.period}</span>
+                  <div>
+                    <p class="sm-fila__titulo">{job.role}</p>
+                    <p class="sm-fila__lugar">
+                      {job.company}
+                      {modalidad(job.place)}
+                    </p>
+                  </div>
+                </li>
+              ))
+            }
+          </ol>
+        </div>
+
+        <div>
+          <h3 class="air-reveal sm-linea sm-lista__titulo">Formación</h3>
+          <ol class="sm-lista">
+            {
+              education.map((ed) => (
+                <li class="air-reveal sm-linea sm-fila">
+                  <span class="sm-fila__periodo">{ed.period}</span>
+                  <div>
+                    <p class="sm-fila__titulo">{ed.title}</p>
+                    <p class="sm-fila__lugar">{ed.school}</p>
+                  </div>
+                </li>
+              ))
+            }
+          </ol>
+        </div>
+
+        <div>
+          <h3 class="air-reveal sm-linea sm-lista__titulo">Idiomas</h3>
+          <ul class="sm-lista">
+            {
+              languages.map((l) => (
+                <li class="air-reveal sm-linea sm-fila">
+                  <span class="sm-fila__periodo">{l.level}</span>
+                  <p class="sm-fila__titulo">{l.label}</p>
+                </li>
+              ))
+            }
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .sm-bloque {
+    display: grid;
+    gap: var(--spacing-32, 2rem);
+    align-items: start;
+  }
+  @media (min-width: 900px) {
+    .sm-bloque {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: clamp(2.5rem, 5vw, 5rem);
+    }
+  }
+
+  /* El filete de cada fila. Va como pseudo-elemento y no como borde para
+     poder dibujarlo con `scaleX`; sin JS (sin `.js`) queda entero. */
+  .sm-linea {
+    position: relative;
+  }
+  .sm-linea::after {
+    content: '';
+    position: absolute;
+    inset: auto 0 0 0;
+    height: 1px;
+    background: rgb(var(--tinta-rgb) / 0.14);
+    transform-origin: left;
+  }
+  :global(.js) .sm-linea::after {
+    transform: scaleX(0);
+    transition: transform 1100ms cubic-bezier(0.22, 1, 0.36, 1);
+    transition-delay: calc(var(--reveal-delay, 0ms) + 150ms);
+  }
+  :global(.js) .sm-linea:global(.is-visible)::after {
+    transform: none;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    :global(.js) .sm-linea::after {
+      transform: none;
+      transition: none;
+    }
+  }
+
+  .sm-lista__titulo {
+    margin: 0;
+    padding-bottom: 0.75rem;
+    font-size: var(--text-caption);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-ink);
+  }
+
+  .sm-lista {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .sm-fila {
+    display: grid;
+    grid-template-columns: 7.5rem minmax(0, 1fr);
+    gap: 1rem;
+    align-items: baseline;
+    padding: 1.25rem 0;
+  }
+
+  .sm-fila__periodo {
+    font-family: var(--font-hero-mono);
+    font-size: 0.75rem;
+    color: var(--color-ink-soft);
+  }
+
+  .sm-fila__titulo {
+    margin: 0;
+    font-size: var(--text-body);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-ink);
+  }
+
+  .sm-fila__lugar {
+    margin: 0.25rem 0 0;
+    font-size: var(--text-caption);
+    color: var(--color-rosewood);
+  }
+</style>

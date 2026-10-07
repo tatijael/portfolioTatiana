@@ -5,7 +5,7 @@ import { site, hero } from '../data/site';
  * Wordmark — la pantalla de apertura, al modelo de air.inc.
  *
  * El nombre entra grande, con el retrato al lado y el rol debajo, y al
- * scrollear se achica y viaja hasta quedar exactamente donde vive el logo de
+ * scrollear se achica y viaja, dando una vuelta entera de costado, hasta quedar donde vive el logo de
  * la nav. El retrato y el rol no viajan: se apagan en el camino, así que el
  * relevo pasa en una pantalla en la que ya no queda nada más. Cuando llega, el de la
  * nav toma su lugar y este desaparece: no hay dos "Tati" en pantalla en
@@ -363,6 +363,20 @@ import { site, hero } from '../data/site';
     mask-position: 0% 0;
   }
 
+  /* ── Con el nombre 3D montado ─────────────────────────────────────────
+     La caja se queda —es la que viaja y la que se mide— pero el texto plano
+     se apaga: lo dibuja el lienzo de WebGL que vive adentro. */
+  .wordmark__word.es-3d {
+    background-image: none;
+  }
+  /* La pluma se saca una vez terminada la entrada. Una máscara recorta todo
+     lo que cae fuera de la caja, y al girar el canto del nombre 3D se sale
+     de ella: quedaría mordido en los costados. */
+  .wordmark__layer.is-live .wordmark__word.es-3d {
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+
   .wordmark__hint {
     position: absolute;
     bottom: var(--spacing-32);
@@ -467,6 +481,9 @@ import { site, hero } from '../data/site';
 </style>
 
 <script>
+  import { TOUCH_QUERY } from '../lib/tactil';
+  import type { Nombre3D } from '../lib/nombre3d';
+
   // ── El viaje del wordmark ───────────────────────────────────────────────
   // Ver el comentario del frontmatter para el porqué de la estructura. Acá
   // va el cómo.
@@ -505,6 +522,10 @@ import { site, hero } from '../data/site';
     let dx = 0;
     let dy = 0;
     let escala = 1;
+    let profundidad = 2000;
+    // El nombre en 3D, si llegó a montarse. Mientras tanto —y siempre en
+    // pantallas táctiles— gira el nombre plano con CSS.
+    let nombre3d: Nombre3D | null = null;
 
     /**
      * Mide los dos rectángulos y calcula el viaje.
@@ -534,6 +555,7 @@ import { site, hero } from '../data/site';
       if (!anchoTexto) return;
 
       escala = chico.width / anchoTexto;
+      profundidad = grande.width * 2;
       // El centro no se toca: el relleno es simétrico, así que el centro de
       // la caja y el del texto son el mismo punto.
       dx = chico.left + chico.width / 2 - (grande.left + grande.width / 2);
@@ -568,6 +590,22 @@ import { site, hero } from '../data/site';
     // pista quedaría clavada a mitad de camino.
     setTimeout(activar, 2550);
 
+    // El nombre llegó: la nav se anuncia (ver "El saludo" en Nav.astro).
+    // Se saca la clase y se fuerza un reflow antes de volver a ponerla para
+    // que la animación arranque de cero aunque la anterior no haya
+    // terminado, si alguien sube y baja rápido.
+    const barra = document.querySelector<HTMLElement>('[data-nav]');
+    let finSaludo = 0;
+    const saludar = () => {
+      if (!barra) return;
+      barra.classList.remove('is-saludo');
+      void barra.offsetWidth;
+      barra.classList.add('is-saludo');
+      clearTimeout(finSaludo);
+      // La cascada más larga: siete links a 70ms más el fundido de 1.1s.
+      finSaludo = window.setTimeout(() => barra.classList.remove('is-saludo'), 1800);
+    };
+
     const pintar = () => {
       pendiente = false;
 
@@ -577,9 +615,24 @@ import { site, hero } from '../data/site';
       const crudo = Math.min(1, Math.max(0, window.scrollY / recorrido));
       const p = suavizar(crudo);
 
-      word.style.transform = `translate(${dx * p}px, ${dy * p}px) scale(${
-        1 + (escala - 1) * p
-      })`;
+      // Una vuelta entera de costado, sobre el eje vertical, como una moneda.
+      // Termina en 360°, que es lo mismo que 0°: aterriza de frente y el
+      // relevo con el logo de la nav no salta. La perspectiva va primero y
+      // se ata al ancho del nombre: con un número fijo, el grande del
+      // principio se deformaría de más y el chico del final ni se notaría.
+      //
+      // Con el nombre 3D el giro lo hace la malla, no la caja: el CSS solo
+      // traslada y achica.
+      if (nombre3d) {
+        word.style.transform = `translate(${dx * p}px, ${dy * p}px) scale(${
+          1 + (escala - 1) * p
+        })`;
+        nombre3d.girar(p);
+      } else {
+        word.style.transform = `perspective(${profundidad}px) translate(${
+          dx * p
+        }px, ${dy * p}px) rotateY(${360 * p}deg) scale(${1 + (escala - 1) * p})`;
+      }
 
       // Todo lo que no viaja se va antes que la palabra: para la mitad del
       // recorrido ya no hay nada más que el nombre viajando, y el relevo con
@@ -606,13 +659,22 @@ import { site, hero } from '../data/site';
 
       // El relevo. Se hace una sola vez por cambio de estado y no en cada
       // frame, para no tocar el DOM sesenta veces por segundo.
+      //
+      // Con el nombre 3D no hay relevo: el 3D se queda en la nav para siempre
+      // (ver dónde se monta, abajo). El saludo de la nav sí va en los dos.
       const llego = crudo >= 0.999;
       if (llego !== aterrizado) {
+        // `false` y no `null`: solo cuando viene de viajar. Si la página
+        // carga ya scrolleada, el nombre arranca en su lugar y no hay
+        // llegada que anunciar.
+        if (llego && aterrizado === false) saludar();
         aterrizado = llego;
         // Por debajo del umbral manda el grande; a partir de ahí, el de la
         // nav, que es el que se puede clickear.
-        layer.style.visibility = llego ? 'hidden' : 'visible';
-        logo.style.visibility = llego ? 'visible' : 'hidden';
+        if (!nombre3d) {
+          layer.style.visibility = llego ? 'hidden' : 'visible';
+          logo.style.visibility = llego ? 'visible' : 'hidden';
+        }
       }
 
       // El hero suelta su animación de entrada cuando la palabra ya se fue
@@ -636,6 +698,7 @@ import { site, hero } from '../data/site';
     // él todo el cálculo. Se vuelve a medir cuando eso pasa.
     const remedir = () => {
       medir();
+      nombre3d?.medir();
       pintar();
     };
 
@@ -643,6 +706,29 @@ import { site, hero } from '../data/site';
     pintar();
 
     document.fonts?.ready.then(remedir);
+
+    // Three.js se pide aparte y solo en escritorio: en un teléfono pesa y
+    // cuesta frames, y el giro plano hace el mismo recorrido. Si WebGL no
+    // está o algo falla, se queda el plano sin que se note.
+    if (!window.matchMedia(TOUCH_QUERY).matches) {
+      import('../lib/nombre3d')
+        .then(({ montarNombre3D }) => montarNombre3D(word, word.textContent?.trim() ?? ''))
+        .then((montado) => {
+          if (!montado) return;
+          nombre3d = montado;
+          word.classList.add('es-3d');
+          // El nombre 3D no le pasa la posta al logo plano: aterriza y se
+          // queda en la nav. El logo sigue ahí con su lugar y su link —la
+          // capa de arriba no intercepta clicks, así que clickear el nombre
+          // es clickear el logo—, y se apaga solo el texto y no el link, para
+          // que el contorno de foco del teclado se siga viendo.
+          layer.style.visibility = 'visible';
+          logo.style.visibility = 'visible';
+          destino.style.opacity = '0';
+          pintar();
+        })
+        .catch(() => {});
+    }
     addEventListener('scroll', alScrollear, { passive: true });
     addEventListener('resize', remedir, { passive: true });
   }
