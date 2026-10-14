@@ -334,7 +334,7 @@ import { site, hero, credencial } from '../data/site';
   }
 
   /* En el teléfono la tarjeta sube un poco para dejarle lugar al pie, y el
-     pie se apila: el rol arriba, los botones debajo. */
+     pie se apila y se centra: el rol arriba, los botones debajo. */
   @media (max-width: 600px) {
     .wordmark__fondo {
       top: 46%;
@@ -346,7 +346,11 @@ import { site, hero, credencial } from '../data/site';
     }
     .wordmark__pie {
       flex-direction: column;
-      align-items: flex-start;
+      align-items: center;
+      text-align: center;
+    }
+    .wordmark__ctas {
+      justify-content: center;
     }
   }
 

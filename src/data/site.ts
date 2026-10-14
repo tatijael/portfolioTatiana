@@ -167,7 +167,7 @@ export const credencial = {
   firma: 'Tati',
   numero: 'TS-0427',
   estado: 'Disponible para proyectos',
-  cinta: 'TATIANA SAUCEDO',
+  cinta: 'ALL ACCESS',
   dorso: {
     titulo: 'Acceso total',
     filas: [

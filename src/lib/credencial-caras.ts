@@ -66,6 +66,17 @@ export const cargarFoto = (src: string) =>
     img.src = src;
   });
 
+/** Las caras se pintan al doble de resolución: la tarjeta se ve a ~700px
+ *  de pantalla con pantallas retina, y a 720 la textura llegaba justa y la
+ *  foto se veía blanda. Se sigue dibujando en coordenadas de ANCHO × ALTO. */
+const NITIDEZ = 2;
+const contexto = (c: HTMLCanvasElement) => {
+  const ctx = c.getContext('2d')!;
+  ctx.setTransform(c.width / ANCHO, 0, 0, c.height / ALTO, 0, 0);
+  ctx.imageSmoothingQuality = 'high';
+  return ctx;
+};
+
 const lienzo = (ancho = ANCHO, alto = ALTO) => {
   const c = document.createElement('canvas');
   c.width = ancho;
@@ -123,10 +134,11 @@ const marco = (ctx: CanvasRenderingContext2D, p: Paleta, fondo: string | CanvasG
   ctx.fillStyle = fondo;
   redondeado(ctx, 26, 64, ANCHO - 52, ALTO - 90, 30);
   ctx.fill();
-  // La ranura por donde pasa la pinza.
-  ctx.fillStyle = p.tintaSuave;
-  redondeado(ctx, ANCHO / 2 - 62, 22, 124, 22, 11);
-  ctx.fill();
+  // La ranura donde muerde la pinza: un óvalo largo, solo el contorno.
+  ctx.strokeStyle = p.tintaSuave;
+  ctx.lineWidth = 4;
+  redondeado(ctx, ANCHO / 2 - 150, 22, 300, 24, 12);
+  ctx.stroke();
   return { x: 26, y: 64, w: ANCHO - 52, h: ALTO - 90 };
 };
 
@@ -136,7 +148,7 @@ const frente = (
   foto: HTMLImageElement | null,
   p: Paleta,
 ) => {
-  const ctx = c.getContext('2d')!;
+  const ctx = contexto(c);
   ctx.clearRect(0, 0, ANCHO, ALTO);
   const m = marco(ctx, p, p.papel);
   const izq = m.x + 34;
@@ -217,7 +229,7 @@ const frente = (
 };
 
 const dorso = (c: HTMLCanvasElement, d: DatosCredencial, p: Paleta) => {
-  const ctx = c.getContext('2d')!;
+  const ctx = contexto(c);
   ctx.clearRect(0, 0, ANCHO, ALTO);
   const fondo = ctx.createLinearGradient(0, 64, ANCHO, ALTO);
   fondo.addColorStop(0, p.rubor);
@@ -307,7 +319,7 @@ const dorso = (c: HTMLCanvasElement, d: DatosCredencial, p: Paleta) => {
   ctx.fillText(linea, izq, ly);
 };
 
-/** La cinta: el nombre repetido a lo largo, en vertical. Se repite como
+/** La cinta: el texto de `cinta` repetido a lo largo, en vertical. Se repite como
  *  textura, así que el alto es un solo módulo. */
 const cinta = (c: HTMLCanvasElement, d: DatosCredencial, p: Paleta) => {
   const ctx = c.getContext('2d')!;
@@ -335,8 +347,8 @@ export interface Caras {
 export async function dibujarCaras(d: DatosCredencial): Promise<Caras> {
   const [, foto] = await Promise.all([cargarFuentes(), cargarFoto(d.foto)]);
   const caras: Caras = {
-    frente: lienzo(),
-    dorso: lienzo(),
+    frente: lienzo(ANCHO * NITIDEZ, ALTO * NITIDEZ),
+    dorso: lienzo(ANCHO * NITIDEZ, ALTO * NITIDEZ),
     cinta: lienzo(128, 760),
     repintar() {
       const p = paleta();

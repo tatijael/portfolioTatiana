@@ -130,8 +130,14 @@ export function montarCredencial3D(
     new THREE.MeshPhysicalMaterial({
       map,
       roughness: 0.55,
-      clearcoat: 0.8,
-      clearcoatRoughness: 0.18,
+      // El brillo especular es aditivo: con el barniz y el reflejo del
+      // entorno de antes, toda la cara llevaba un velo gris que lavaba la
+      // foto y aclaraba la tinta. Se deja un resto, para que al girar se
+      // note la luz.
+      specularIntensity: 0.15,
+      clearcoat: 0.1,
+      clearcoatRoughness: 0.3,
+      envMapIntensity: 0.15,
     });
   const matFrente = materialCara(texFrente);
   const matDorso = materialCara(texDorso);
@@ -150,19 +156,50 @@ export function montarCredencial3D(
   );
   canto.position.z = -GROSOR / 2;
 
-  // La pinza de metal que une la cinta con la tarjeta.
+  // El enganche que une la cinta con la tarjeta, como el de las
+  // credenciales de verdad: una argolla rectangular de alambre que baja de
+  // la cinta y una pinza redondeada que muerde la ranura. La pinza baja
+  // hasta la ranura y su pie queda dentro del grosor de la tarjeta.
   const PINZA = 0.13; // largo, en anchos de tarjeta
   const metal = new THREE.MeshStandardMaterial({
-    color: 0xc9d0d8,
-    metalness: 1,
-    roughness: 0.28,
+    color: 0xdfe3ea,
+    metalness: 0.6,
+    roughness: 0.32,
   });
+  // La argolla: un rectángulo de esquinas redondeadas, de alambre.
+  const argolla = new THREE.CurvePath<THREE.Vector3>();
+  {
+    // Del ancho de la cinta, que pasa por adentro y se dobla sobre el
+    // lado de arriba.
+    const a = 0.082; // medio ancho
+    const b = 0.026; // medio alto
+    const r = 0.016; // radio de las esquinas
+    const v = (x: number, y: number) => new THREE.Vector3(x, y, 0);
+    const esquinas: [number, number, number, number][] = [
+      [a, b, 1, 1],
+      [-a, b, -1, 1],
+      [-a, -b, -1, -1],
+      [a, -b, 1, -1],
+    ];
+    esquinas.forEach(([x, y, sx, sy], i) => {
+      // Cada tramo: la curva de una esquina y el lado recto hasta la próxima.
+      const [nx, ny, nsx, nsy] = esquinas[(i + 1) % 4];
+      const entra = i % 2 === 0 ? v(x, y - sy * r) : v(x - sx * r, y);
+      const sale = i % 2 === 0 ? v(x - sx * r, y) : v(x, y - sy * r);
+      argolla.add(new THREE.QuadraticBezierCurve3(entra, v(x, y), sale));
+      const proxima = i % 2 === 0 ? v(nx, ny - nsy * r) : v(nx - nsx * r, ny);
+      argolla.add(new THREE.LineCurve3(sale, proxima));
+    });
+  }
   const pinza = new THREE.Group();
-  const cuerpoPinza = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.06, 0.04), metal);
-  cuerpoPinza.position.y = PROPORCION / 2 + 0.015;
-  const ganchoPinza = new THREE.Mesh(new THREE.TorusGeometry(0.04, 0.012, 10, 24), metal);
-  ganchoPinza.position.y = PROPORCION / 2 + 0.085;
-  pinza.add(cuerpoPinza, ganchoPinza);
+  const aro = new THREE.Mesh(new THREE.TubeGeometry(argolla, 80, 0.008, 10, true), metal);
+  aro.position.y = PROPORCION / 2 + 0.106;
+  // La pinza: una cápsula gruesa que va del lado de abajo de la argolla
+  // hasta el medio de la ranura. Sobresale del grosor de la tarjeta por las
+  // dos caras, así se ve igual cuando se da vuelta.
+  const pieza = new THREE.Mesh(new THREE.CapsuleGeometry(0.026, 0.07, 8, 20), metal);
+  pieza.position.y = PROPORCION / 2 + 0.019;
+  pinza.add(aro, pieza);
 
   const tarjeta = new THREE.Group();
   // Primero el giro propio (Y, darse vuelta) y después el balanceo (Z).
