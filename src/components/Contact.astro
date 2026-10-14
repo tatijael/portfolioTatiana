@@ -1,94 +1,100 @@
 ---
 import { contact, cvUrl, site, socials } from '../data/site';
-import DualHeadline from './ui/DualHeadline.astro';
 
 /**
- * Contacto — una sola tarjeta con el mensaje a la izquierda y las acciones
- * directas apiladas a la derecha.
+ * Contacto: el cierre de la página.
  *
- * Antes había un formulario de cuatro campos. Sin endpoint configurado
- * terminaba abriendo el cliente de mail igual, o sea: cuatro campos para
- * hacer lo mismo que hace un mailto, con más fricción y más chance de que
- * alguien lo abandone a la mitad. Las acciones directas son un click.
+ * Un titular enorme en dos renglones, tres acciones y, debajo de un
+ * filete, el pie: el copyright y la vuelta arriba. Sin caja ni fondo propio,
+ * en el mismo idioma tipográfico que la apertura.
  *
- * El orden es jerárquico: mail primero (relleno claro, el elemento más
- * brillante de la sección, como manda el CTA primario de Air), el resto en
- * ghost. Los links salen de `socials` y de `site.email` en site.ts — no hay
- * ninguno escrito a mano acá.
+ * Las acciones son exactamente tres, por pedido: escribir (mailto, el
+ * principal), LinkedIn y el CV. No hay formulario: sin un endpoint
+ * terminaría abriendo el cliente de mail igual, con más pasos.
  */
-/* Los que no van como botón en esta sección.
-   GitHub salió por pedido y de momento: el filtro es local a Contacto a
-   propósito, así sigue estando en el pie y en "Sobre mí", que es donde un
-   link al perfil no compite con nada. Acá sí competía: estos tres botones
-   son la llamada a la acción de la página, y el tercero desviaba a alguien
-   que ya estaba por escribir.
-   Para que vuelva, vaciá el array. */
-const ocultosEnContacto: string[] = ['GitHub'];
-
-const links = socials.filter(
-  (s) => !s.href.startsWith('mailto:') && !ocultosEnContacto.includes(s.label),
-);
+const linkedin = socials.find((s) => s.label === 'LinkedIn')?.href;
+// El CV puede cambiar de formato: la descarga toma la extensión del archivo.
+const extension = cvUrl?.match(/\.[a-z0-9]+$/i)?.[0] ?? '';
+const anio = new Date().getFullYear();
 ---
 
 <section
   id="contacto"
-  class="air-bleed air-dots py-[var(--section-pad)] md:py-[var(--section-pad-lg)]"
-  data-parallax="0.04"
+  class="pt-[var(--section-pad)] md:pt-[var(--section-pad-lg)]"
 >
   <div class="air-container">
-    <div
-      class="air-reveal air-card-glass grid items-center gap-10 md:grid-cols-[1.1fr_1fr] md:gap-14"
-    >
-      <div class="flex flex-col gap-5">
-        <p class="air-eyebrow">{contact.eyebrow}</p>
-        <DualHeadline
-          before={contact.headlineBefore}
-          cursive={contact.cursive}
-          after={contact.headlineAfter}
-          class="text-ink"
-        />
-        <p class="max-w-[46ch] text-body font-normal text-ink/75">
-          {contact.subtitle}
-        </p>
-      </div>
+    <h2 class="ct__titulo air-reveal">
+      {contact.titulo.map((linea) => <span>{linea}</span>)}
+    </h2>
 
-      <div class="flex flex-col gap-3">
-        <a
-          href={`mailto:${site.email}`}
-          class="air-btn-light w-full !justify-center px-5 py-3"
-        >
-          Escribime a {site.email}
-        </a>
-
-        {
-          links.map((s) => (
-            <a
-              href={s.href}
-              class="air-btn-ghost w-full !justify-center px-5 py-3"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Abrir {s.label}
-            </a>
-          ))
-        }
-
-        {
-          cvUrl && (
-            <a
-              href={cvUrl}
-              class="air-btn-ghost w-full !justify-center px-5 py-3"
-              download="Tatiana-Saucedo-CV.pdf"
-            >
-              Descargar CV
-            </a>
-          )
-        }
-
-        <p class="pt-1 text-center text-caption font-normal text-ink/60">
-          {contact.nota}
-        </p>
-      </div>
+    <div class="ct__acciones air-reveal">
+      <a href={`mailto:${site.email}`} class="air-btn-light ct__boton">{contact.escribir}</a>
+      {
+        linkedin && (
+          <a href={linkedin} class="air-btn-ghost ct__boton" target="_blank" rel="noopener noreferrer">
+            {contact.linkedin}
+          </a>
+        )
+      }
+      {
+        cvUrl && (
+          <a href={cvUrl} class="air-btn-ghost ct__boton" download={`Tatiana-Saucedo-CV${extension}`}>
+            {contact.cv}
+          </a>
+        )
+      }
     </div>
+
+    <footer class="ct__pie">
+      <p class="m-0">© {anio} {site.name}</p>
+      <a href="#top" class="ct__arriba">Volver arriba</a>
+    </footer>
   </div>
 </section>
+
+<style>
+  .ct__titulo {
+    margin: 0;
+    font-family: var(--font-hero-display);
+    font-weight: 800;
+    font-size: clamp(3rem, 8.5vw, 8rem);
+    line-height: 0.92;
+    letter-spacing: -0.045em;
+    color: var(--color-ink);
+  }
+  .ct__titulo span {
+    display: block;
+  }
+
+  .ct__acciones {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: clamp(28px, 4vw, 48px);
+  }
+  .ct__boton {
+    padding: 0.85em 1.6em;
+    border-radius: var(--radius-pills);
+  }
+
+  .ct__pie {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 12px 24px;
+    margin-top: clamp(80px, 12vw, 160px);
+    padding: 20px 0 28px;
+    border-top: 1px solid var(--hero-line);
+    font-size: 0.8125rem;
+    color: var(--hero-mist);
+  }
+  .ct__arriba {
+    color: inherit;
+    text-decoration: none;
+  }
+  .ct__arriba:hover {
+    color: var(--color-ink);
+    text-decoration: underline;
+  }
+</style>

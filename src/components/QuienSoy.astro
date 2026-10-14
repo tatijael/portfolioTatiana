@@ -1,0 +1,200 @@
+---
+import { cvUrl, sobreMi } from '../data/site';
+
+/**
+ * Sobre mí, versión corta: la sección antes de Contacto.
+ *
+ * La foto grande a la izquierda y, a la derecha, el texto en el mismo
+ * idioma que la apertura y la presentación: una frase grande, la bio, tres
+ * líneas numeradas con filetes y el botón del CV. Sin caja alrededor y sin
+ * íconos.
+ *
+ * ── La entrada ───────────────────────────────────────────────────────────
+ * La dispara el mismo observer del sitio (`.air-reveal` → `.is-visible`, en
+ * Layout.astro), pero con movimiento propio, definido abajo:
+ *
+ *   foto    se abre desde el centro hacia los bordes (un `clip-path` que
+ *           va de un punto a la foto entera) y la imagen se asienta de un
+ *           zoom leve mientras se abre
+ *   textos  cada uno entra desde la derecha, uno detrás del otro, en el
+ *           orden en que se leen. El retraso es propio (`--qs-retraso`):
+ *           el que reparte Layout corta en 320ms y acá hay siete piezas
+ *
+ * Reemplaza a SobreMi.astro y a Stack.astro, que siguen en el repo sin
+ * montar.
+ */
+
+// El CV puede cambiar de formato: el nombre de la descarga toma la extensión
+// del archivo real.
+const extension = cvUrl?.match(/\.[a-z0-9]+$/i)?.[0] ?? '';
+---
+
+<section
+  id="sobre-mi"
+  class="overflow-x-clip py-[var(--section-pad)] md:py-[var(--section-pad-lg)]"
+>
+  <div class="air-container qs">
+    {/* El disparador va en este envoltorio y no en la figura: el
+        IntersectionObserver descuenta el `clip-path`, y una figura que
+        arranca recortada a un punto nunca "entra" en pantalla. */}
+    <div class="qs__marco air-reveal">
+      <figure class="qs__foto">
+        <img
+          src={sobreMi.foto}
+          alt={sobreMi.fotoAlt}
+          width="972"
+          height="1200"
+          loading="lazy"
+          decoding="async"
+        />
+      </figure>
+    </div>
+
+    <div class="qs__texto">
+      <h2 class="air-eyebrow m-0 air-reveal qs__entra" style="--qs-retraso: 350ms">
+        {sobreMi.titulo}
+      </h2>
+      <p class="qs__frase air-reveal qs__entra" style="--qs-retraso: 450ms">{sobreMi.frase}</p>
+      <p class="qs__bio air-reveal qs__entra" style="--qs-retraso: 570ms">{sobreMi.texto}</p>
+
+      <ol class="qs__puntos" role="list">
+        {
+          sobreMi.puntos.map((punto, i) => (
+            <li class="qs__punto air-reveal qs__entra" style={`--qs-retraso: ${670 + i * 100}ms`}>
+              <span class="qs__num">{String(i + 1).padStart(2, '0')}</span>
+              <span>{punto}</span>
+            </li>
+          ))
+        }
+      </ol>
+
+      {
+        cvUrl && (
+          <a href={cvUrl} class="air-btn-light qs__cv air-reveal qs__entra" style="--qs-retraso: 1000ms" download={`Tatiana-Saucedo-CV${extension}`}>
+            Descargar CV
+          </a>
+        )
+      }
+    </div>
+  </div>
+</section>
+
+<style>
+  .qs {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+    align-items: center;
+    gap: clamp(40px, 6vw, 96px);
+  }
+
+  .qs__foto {
+    margin: 0;
+    aspect-ratio: 4 / 5;
+    overflow: hidden;
+    border-radius: 28px;
+  }
+  .qs__foto img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 40% 28%;
+  }
+
+  .qs__frase {
+    max-width: 16ch;
+    margin: 1rem 0 0;
+    font-family: var(--font-hero-display);
+    font-weight: 800;
+    font-size: clamp(2rem, 3.6vw, 3.5rem);
+    line-height: 1;
+    letter-spacing: -0.03em;
+    text-wrap: balance;
+    color: var(--color-ink);
+  }
+
+  .qs__bio {
+    max-width: 44ch;
+    margin: 1.5rem 0 0;
+    font-size: var(--text-body);
+    line-height: 1.6;
+    color: var(--color-ink-soft);
+  }
+
+  .qs__puntos {
+    margin: 2rem 0 0;
+    padding: 0;
+    border-top: 1px solid var(--hero-line);
+    list-style: none;
+  }
+  .qs__punto {
+    display: grid;
+    grid-template-columns: 3rem 1fr;
+    align-items: baseline;
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--hero-line);
+    font-size: clamp(1rem, 1.3vw, 1.125rem);
+    font-weight: var(--font-weight-medium);
+    line-height: 1.35;
+    color: var(--color-ink);
+  }
+  .qs__num {
+    font-family: var(--font-hero-mono);
+    font-size: 0.8125rem;
+    letter-spacing: 0.08em;
+    color: var(--hero-mist);
+  }
+
+  .qs__cv {
+    margin-top: 2rem;
+  }
+
+  /* ── La entrada ─────────────────────────────────────────────────────── */
+  :global(.js) .qs__marco.air-reveal {
+    opacity: 1;
+    transform: none;
+  }
+  :global(.js) .qs__marco .qs__foto {
+    clip-path: inset(50% 50% 50% 50% round 28px);
+    transition: clip-path 1.3s cubic-bezier(0.65, 0, 0.25, 1);
+  }
+  :global(.js) .qs__marco .qs__foto img {
+    transform: scale(1.18);
+    transition: transform 1.6s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  :global(.js) .qs__marco.is-visible .qs__foto {
+    clip-path: inset(0 round 28px);
+  }
+  :global(.js) .qs__marco.is-visible .qs__foto img {
+    transform: none;
+  }
+
+  /* La transición se declara entera y no solo el retraso: el botón trae la
+     suya (`.air-btn-light`, para el hover) y pisaría la de la entrada. */
+  :global(.js) .qs__entra.air-reveal {
+    transform: translateX(56px);
+    transition:
+      opacity 900ms cubic-bezier(0.22, 1, 0.36, 1) var(--qs-retraso, 0ms),
+      transform 900ms cubic-bezier(0.22, 1, 0.36, 1) var(--qs-retraso, 0ms);
+  }
+  :global(.js) .qs__entra.air-reveal.is-visible {
+    transform: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    :global(.js) .qs__marco .qs__foto,
+    :global(.js) .qs__marco .qs__foto img,
+    :global(.js) .qs__entra.air-reveal {
+      transition: none;
+    }
+  }
+
+  @media (max-width: 767px) {
+    .qs {
+      grid-template-columns: 1fr;
+    }
+    .qs__marco {
+      max-width: 420px;
+    }
+  }
+</style>

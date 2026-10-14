@@ -1,18 +1,19 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import { site, hero } from '../data/site';
-import Nav from '../components/Nav.astro';
 import Wordmark from '../components/Wordmark.astro';
 import TemaSwitch from '../components/TemaSwitch.astro';
+import Presentacion from '../components/Presentacion.astro';
 import Projects from '../components/Projects.astro';
-import Stack from '../components/Stack.astro';
-import SobreMi from '../components/SobreMi.astro';
 import Gallery from '../components/Gallery.astro';
+import QuienSoy from '../components/QuienSoy.astro';
 import Contact from '../components/Contact.astro';
 ---
 
 <Layout>
-  <Nav />
+  {/* Sin barra de navegación desde el 2026-10-13: la apertura va a
+      pantalla completa, con la cinta de la credencial hasta el borde.
+      Nav.astro queda en el repo. */}
   <TemaSwitch />
   {/* Fuera de <main> a propósito: es una pieza decorativa de apertura, no
       contenido. Así el skip link salta directo a lo que se lee. */}
@@ -23,18 +24,18 @@ import Contact from '../components/Contact.astro';
       lee, que va de "qué hacés" a "escribime" y no puede saltearse ningún
       escalón.
 
-        apertura     quién sos — nombre, rol y las dos acciones
+        apertura     quién sos — la credencial, el rol y las dos acciones
+        Presentación la foto, el titular que se escribe solo y la bio
         ── la prueba ──
-        Proyectos    los casos. Va temprano a propósito: la evidencia
+        Proyectos    los casos. Van temprano a propósito: la evidencia
                      primero, la promesa después
-        Stack        con qué los construiste, mientras están frescos
-        ── la persona ──
-        Sobre mí     recién después de la prueba. La bio arriba volvería el
-                     sitio sobre vos en vez de sobre el problema de quien lee.
-                     Lleva también la trayectoria: experiencia, formación
-                     e idiomas, una línea cada uno
         Galería      los fragmentos de esos mismos proyectos
-        ── el cierre ──
+        ── la persona y el cierre ──
+        Sobre mí     el panel corto (QuienSoy.astro): bio, tres puntos y el
+                     CV. Pegado a Contacto: quien llegó hasta acá ya vio el
+                     trabajo y ahora decide si escribir. El stack y la
+                     trayectoria se sacaron el 2026-10-13; el detalle está
+                     en el CV
         Contacto     la acción, y el final de la página
 
       Sin pie: la página termina en Contacto a propósito. Un pie con un menú
@@ -42,8 +43,8 @@ import Contact from '../components/Contact.astro';
       ruido en el peor momento — justo cuando alguien terminó de leer y tiene
       que decidir.
 
-      `nav` en site.ts sigue este mismo orden. Si movés una sección acá,
-      movela también allá o el menú deja de describir la página. */}
+      `nav` en site.ts es el menú de Nav.astro, que hoy no está montada. Si
+      vuelve, hay que ponerlo en este orden. */}
   <main id="contenido">
     {/* ── El h1 de la página, solo para lectores ─────────────────────────
         El hero se fue porque repetía la presentación que ya hace la
@@ -62,10 +63,10 @@ import Contact from '../components/Contact.astro';
         nombre es un degradado recortado contra la letra. */}
     <h1 class="sr-only">{site.name} — {hero.wordmarkRole}</h1>
 
+    <Presentacion />
     <Projects />
-    <Stack />
-    <SobreMi />
     <Gallery />
+    <QuienSoy />
     <Contact />
   </main>
 </Layout>

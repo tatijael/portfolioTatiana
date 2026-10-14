@@ -110,6 +110,77 @@ export const hero = {
   secondaryCta: { label: 'Contacto', href: '#contacto' },
 } as const;
 
+/* ── La presentación: la sección que sigue a la apertura ───────────────────
+   Foto con una captura de proyecto encima a la izquierda, y a la derecha un
+   titular que se escribe solo y la bio. El párrafo es el de posicionamiento
+   que había quedado sin lugar cuando se desmontó el hero.
+
+   ⚠️ PROVISORIO: la foto es la misma de "Sobre mí" hasta definir la final. */
+export const presentacion = {
+  saludo: 'hola, soy Tati',
+  titular: 'Construyo tiendas que la gente de verdad usa.',
+  texto: hero.aside,
+  foto: '/images/retrato.jpg',
+  fotoAlt: 'Tatiana Saucedo en su escritorio',
+  pantalla: '/images/cherry-muse.jpg',
+  pantallaAlt: 'La tienda de Cherry Muse, uno de los proyectos',
+} as const;
+
+/* ── Sobre mí, versión corta ──────────────────────────────────────────────
+   Reemplaza a SobreMi.astro (bio larga + stack + trayectoria). Va antes de
+   Contacto. El detalle de experiencia y formación vive en el CV, y por eso
+   el botón de descarga es la acción de la sección.
+
+   Todo sale de textos que ya estaban en el sitio (`about`, `trayectoria`,
+   `hero.aside`), condensados. */
+export const sobreMi = {
+  titulo: 'Sobre mí',
+  frase: 'Me gusta entender el porqué antes de escribir la primera línea.',
+  texto:
+    'Soy Tatiana, desarrolladora full stack en Buenos Aires. Desde 2020 trabajo en e-commerce, entre agencias Shopify Experts y equipos de producto.',
+  puntos: [
+    'Tiendas Shopify Plus a medida: temas, apps e integraciones',
+    'De puente entre diseño, desarrollo y negocio',
+    'Resuelvo el cuello de botella real, no el síntoma',
+  ],
+  // ⚠️ Provisoria: la misma de la presentación hasta tener la definitiva.
+  foto: '/images/retrato.jpg',
+  fotoAlt: 'Tatiana Saucedo en su escritorio',
+} as const;
+
+/* ── La credencial de la apertura ─────────────────────────────────────────
+   Cuelga a la derecha del nombre, en el lugar que ocupaba el retrato: cae
+   al cargar, se balancea, se puede arrastrar y al pasar el mouse se da
+   vuelta. Las dos caras se dibujan con estos datos (src/lib/credencial-
+   caras.ts), así que para cambiar lo que dice no hay que tocar el diseño.
+
+   ⚠️ PROVISORIO: foto y datos son de ejemplo hasta definir los finales.
+   La foto conviene vertical y con fondo liso o transparente; `encuadre`
+   es el punto de la foto que queda centrado (0–1 en cada eje). */
+export const credencial = {
+  foto: '/images/retrato.jpg',
+  encuadre: { x: 0.4, y: 0.28 },
+  nombre: 'TATIANA',
+  apellido: 'SAUCEDO',
+  rol: 'Full Stack Developer',
+  rolExtra: '+ Shopify Specialist',
+  firma: 'Tati',
+  numero: 'TS-0427',
+  estado: 'Disponible para proyectos',
+  cinta: 'TATIANA SAUCEDO',
+  dorso: {
+    titulo: 'Acceso total',
+    filas: [
+      ['Base', 'Buenos Aires, AR'],
+      ['Stack', 'Shopify · React · Node'],
+      ['Desde', '2021'],
+      ['Idiomas', 'Español · Inglés'],
+      ['Contacto', 'tatijael@gmail.com'],
+    ],
+    nota: 'Si encontrás esta credencial, escribime.',
+  },
+} as const;
+
 /* ── El retrato que gira al scrollear ─────────────────────────────────────
    El efecto es scrubbing de frames: cada posición del scroll muestra un
    frame distinto de una secuencia, y el giro lo hace el material. No es una
@@ -329,8 +400,9 @@ export const gallery = {
     {title: 'Bendito — Puntos de venta', link: 'https://www.benditoaceite.com/pages/puntos-de-venta', thumbnail: '/images/bendito-aceite-locator.jpg'},
     {title: 'Marcela Ganly Sculpture', link: 'https://ganly.net', thumbnail: '/images/ganly.jpg'},
     {title: 'ZYN Wholesale', link: 'https://zynwholesale.com', thumbnail: '/images/zyn-wholesale.jpg'},
-    {title: 'Shipping Protection', thumbnail: '/images/zyn-shipping-protection.jpg'},
-  ] as { title: string; link?: string; thumbnail: string }[],
+    // Captura chica (397 px): va entera sobre el papel en vez de estirarse.
+    {title: 'Shipping Protection', thumbnail: '/images/zyn-shipping-protection.jpg', entera: true},
+  ] as { title: string; link?: string; thumbnail: string; entera?: boolean }[],
 } as const;
 
 /* ── Servicios ────────────────────────────────────────────────────────── */
@@ -677,12 +749,10 @@ export const languages = [
 
 /* ── Contacto ─────────────────────────────────────────────────────────── */
 export const contact = {
-  eyebrow: 'Contacto',
-  headlineBefore: 'Contame qué querés',
-  cursive: 'construir',
-  headlineAfter: '.',
-  subtitle:
-    'Proyectos de e-commerce, frontend de producto o una tienda que necesita andar más rápido. Respondo dentro de las 48 hs.',
-  /** Línea chica debajo de los botones. */
-  nota: 'Respondo dentro de las 48 hs, en español o inglés.',
+  /* El cierre, al modelo del reel: el titular de siempre pero enorme, en
+     dos renglones, y las tres acciones — escribir, LinkedIn y el CV. */
+  titulo: ['Contame qué querés', 'construir.'],
+  escribir: 'Contactame',
+  linkedin: 'Abrir LinkedIn',
+  cv: 'Descargar CV',
 } as const;

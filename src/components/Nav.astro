@@ -106,18 +106,6 @@ import { nav, site } from '../data/site';
      El link va al 72% y no al 85%: sobre papel, una tinta apenas apagada ya
      se lee como secundaria, mientras que sobre negro hacía falta más cuerpo
      para no perderla. Mide 9.4:1, y el hover sube al 100%. */
-  /* Mientras la pieza de apertura está en pantalla, el logo de la nav no
-     existe: el "Tati" que se ve es el grande, viajando hacia acá. Cuando
-     llega, el script hace el relevo escribiendo `visibility` inline en los
-     dos elementos, y ese inline le gana a esta regla.
-
-     Esta regla cubre solo el tramo anterior: desde que el navegador pinta
-     la nav hasta que el script del wordmark corre por primera vez. Sin
-     ella, ahí se ven dos "Tati" durante un frame. */
-  :global(html.wordmark-activo) .air-logo {
-    visibility: hidden;
-  }
-
   /* ── La tira de links ──────────────────────────────────────────────────
      Siete links con 28px entre sí y no 16px: con poco aire se leían como
      una frase y no como opciones separadas. El subrayado que crece desde

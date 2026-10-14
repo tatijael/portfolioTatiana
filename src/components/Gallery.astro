@@ -1,16 +1,395 @@
 ---
 import { gallery } from '../data/site';
-import { HeroParallax } from './react/HeroParallax.tsx';
+
+/**
+ * Galería: un titular centrado y un carrusel de capturas en anillo.
+ *
+ * ── El anillo ────────────────────────────────────────────────────────────
+ * Por debajo es una tira con el scroll lateral nativo —trackpad, el dedo,
+ * y arrastrar con el mouse—. Encima, el script hace tres cosas:
+ *
+ *   curva   cada tarjeta se gira según su distancia al centro de la
+ *           pantalla: de frente en el medio, de costado hacia los bordes.
+ *           Así la tira se lee como la cara de un cilindro.
+ *   sin fin las capturas van tres veces seguidas y el scroll se mantiene
+ *           en la copia del medio: al pasar de un borde salta, sin que se
+ *           note, a la misma posición de la copia de al lado.
+ *   pases   el anillo avanza solo de a una tarjeta: cada ~2.6 s pasa a
+ *           la siguiente y frena con ella al centro. Se detiene con el
+ *           mouse encima, al arrastrar o al tocarlo, y retoma un rato
+ *           después. Al soltar un arrastre se acomoda en la más cercana.
+ *           Con prefers-reduced-motion no pasa solo.
+ *
+ * Las dos copias extra son decorativas: van aria-hidden y fuera del orden
+ * del teclado, así un lector de pantalla recorre la galería una vez.
+ *
+ * Reemplaza al parallax de HeroParallax.tsx, que sigue en el repo.
+ */
+
+const dominio = (url: string) => new URL(url).hostname.replace(/^www\./, '');
+
+// Tres vueltas de las mismas capturas: la del medio es la real.
+const copias = [0, 1, 2];
 ---
 
-<section id="galeria">
-  <HeroParallax items={gallery.items} subtitle={gallery.subtitle} client:idle>
-    <div slot="title" class="flex flex-col gap-3">
-      <p class="air-eyebrow">{gallery.eyebrow}</p>
-      <h2 class="font-control-tnt text-heading-lg-fluid font-medium text-balance text-ink">
-        {gallery.title}{' '}<span class="air-cursive">{gallery.cursive}</span
-        >{gallery.after}
-      </h2>
-    </div>
-  </HeroParallax>
+<section id="galeria" class="py-[var(--section-pad)] md:py-[var(--section-pad-lg)]">
+  <header class="air-container gal__cabecera air-reveal">
+    <h2 class="gal__titulo">
+      {gallery.title} {gallery.cursive}{gallery.after}
+    </h2>
+    <p class="gal__bajada">{gallery.subtitle}</p>
+  </header>
+
+  <ul class="gal__tira air-reveal" role="list" data-tira>
+    {copias.map((copia) =>
+      gallery.items.map((item) => (
+        <li class="gal__item" aria-hidden={copia !== 1 ? 'true' : undefined}>
+          <figure class="gal__figura">
+            <div class:list={['gal__marco', item.entera && 'gal__marco--entera']}>
+              <img
+                src={item.thumbnail}
+                alt={item.title}
+                loading="lazy"
+                decoding="async"
+                draggable="false"
+              />
+            </div>
+            <figcaption class="gal__pie">
+              <span class="gal__nombre">{item.title}</span>
+              {item.link && (
+                <a
+                  href={item.link}
+                  class="gal__link"
+                  target="_blank"
+                  rel="noopener"
+                  tabindex={copia !== 1 ? -1 : undefined}
+                >
+                  {dominio(item.link)}
+                </a>
+              )}
+            </figcaption>
+          </figure>
+        </li>
+      )),
+    )}
+  </ul>
 </section>
+
+<style>
+  .gal__cabecera {
+    text-align: center;
+  }
+  .gal__titulo {
+    margin: 0 auto;
+    max-width: 18ch;
+    font-family: var(--font-hero-display);
+    font-weight: 800;
+    font-size: clamp(2.25rem, 5vw, 4.5rem);
+    line-height: 1;
+    letter-spacing: -0.03em;
+    text-wrap: balance;
+    color: var(--color-ink);
+  }
+  .gal__bajada {
+    max-width: 52ch;
+    margin: 1rem auto 0;
+    font-size: var(--text-body);
+    line-height: 1.6;
+    color: var(--color-ink-soft);
+  }
+
+  /* ── El anillo ────────────────────────────────────────────────────────
+     A todo el ancho de la pantalla y sin snap nativo: el script centra cada
+     tarjeta con su propio pase suave, y el snap del navegador se pelearía
+     con él. El relleno
+     vertical deja aire para el canto de las tarjetas giradas. */
+  .gal__tira {
+    display: flex;
+    gap: clamp(12px, 1.5vw, 24px);
+    margin: clamp(32px, 5vw, 56px) 0 0;
+    padding: 24px 0 8px;
+    list-style: none;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+    cursor: grab;
+  }
+  .gal__tira::-webkit-scrollbar {
+    display: none;
+  }
+  .gal__tira.is-arrastrando {
+    cursor: grabbing;
+    user-select: none;
+  }
+
+  .gal__item {
+    flex: none;
+    width: clamp(240px, 34vw, 520px);
+  }
+  .gal__figura {
+    margin: 0;
+    transform-style: preserve-3d;
+    will-change: transform;
+  }
+
+  .gal__marco {
+    aspect-ratio: 16 / 10;
+    overflow: hidden;
+    border-radius: 18px;
+    background: var(--color-surface);
+    box-shadow: 0 0 0 1px var(--hero-line);
+  }
+  .gal__marco img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: left top;
+    transition: transform 600ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .gal__marco--entera {
+    display: grid;
+    place-items: center;
+    padding: 12%;
+  }
+  .gal__marco--entera img {
+    height: auto;
+    object-fit: contain;
+    border-radius: 8px;
+  }
+  @media (hover: hover) {
+    .gal__item:hover .gal__marco img {
+      transform: scale(1.03);
+    }
+  }
+
+  .gal__pie {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 12px;
+    margin-top: 0.85rem;
+    font-size: 0.875rem;
+  }
+  .gal__nombre {
+    font-weight: var(--font-weight-medium);
+    color: var(--color-ink);
+  }
+  .gal__link {
+    font-family: var(--font-hero-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.04em;
+    color: var(--hero-mist);
+    text-decoration: none;
+  }
+  .gal__link:hover {
+    color: var(--color-ink);
+    text-decoration: underline;
+  }
+</style>
+
+<script>
+  const quieto = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  document.querySelectorAll<HTMLElement>('[data-tira]').forEach((tira) => {
+    const items = Array.from(tira.querySelectorAll<HTMLElement>('.gal__item'));
+    const figuras = items.map((li) => li.querySelector<HTMLElement>('.gal__figura')!);
+    const porCopia = items.length / 3;
+
+    // Ancho de una vuelta: de la primera tarjeta de una copia a la primera
+    // de la siguiente.
+    let vuelta = 0;
+    const medir = () => {
+      vuelta = items[porCopia].offsetLeft - items[0].offsetLeft;
+    };
+
+    // ── Sin fin ───────────────────────────────────────────────────────────
+    // `pos` es la posición con decimales; `scrollLeft` se redondea, y el
+    // giro lento se perdería en el redondeo.
+    let pos = 0;
+    const ir = (x: number) => {
+      pos = x;
+      tira.scrollLeft = x;
+    };
+    const envolver = () => {
+      if (!vuelta) return;
+      const salto = pos < vuelta * 0.5 ? vuelta : pos > vuelta * 1.5 ? -vuelta : 0;
+      if (!salto) return;
+      ir(pos + salto);
+      // Si había un pase en curso, se corre con el salto.
+      if (anim) {
+        anim.desde += salto;
+        anim.hasta += salto;
+      }
+    };
+
+    // Posición que deja la tarjeta `k` centrada. Todas miden lo mismo, así
+    // que alcanza con el paso entre dos.
+    const paso = () => items[1].offsetLeft - items[0].offsetLeft;
+    const centroDe = (k: number) =>
+      items[0].offsetLeft + k * paso() + items[0].offsetWidth / 2 - tira.clientWidth / 2;
+    const cercana = () => Math.round((pos - centroDe(0)) / paso());
+
+    // ── Curva ─────────────────────────────────────────────────────────────
+    const curvar = () => {
+      const ancho = tira.clientWidth;
+      const medio = tira.getBoundingClientRect().left + ancho / 2;
+      items.forEach((li, i) => {
+        const r = li.getBoundingClientRect();
+        const d = (r.left + r.width / 2 - medio) / (ancho / 2);
+        // Fuera de pantalla no se toca: ahorra trabajo en las copias.
+        if (Math.abs(d) > 1.6) return;
+        const giro = Math.max(-1.3, Math.min(1.3, d));
+        // La perspectiva va en el propio transform: puesta en la tira no
+        // llega, porque la tarjeta no es hija directa de ella.
+        figuras[i].style.transform = `perspective(1200px) rotateY(${
+          -giro * 38
+        }deg) translateZ(${-Math.abs(giro) * 140}px)`;
+      });
+    };
+
+    // ── Pasar de a una ────────────────────────────────────────────────────
+    // Cada ESPERA ms el anillo avanza una tarjeta y frena con la siguiente
+    // centrada. El pase dura DURACION y arranca y llega suave.
+    const ESPERA = 2600;
+    const DURACION = 900;
+    const suave = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2);
+
+    let anim: { desde: number; hasta: number; t0: number } | null = null;
+    let proximo = performance.now() + ESPERA;
+    const pasarA = (x: number) => {
+      if (quieto) {
+        ir(x);
+        return;
+      }
+      anim = { desde: pos, hasta: x, t0: performance.now() };
+    };
+
+    let pausaHasta = 0;
+    const pausar = (ms: number) => {
+      pausaHasta = performance.now() + ms;
+    };
+    let encima = false;
+    let arrastrando = false;
+    let visible = false;
+    let cuadro = 0;
+
+    const bucle = (ahora: number) => {
+      cuadro = 0;
+      // Si el usuario scrolleó la tira por su cuenta, gana él: se toma esa
+      // posición y se corta el pase.
+      if (Math.abs(tira.scrollLeft - pos) > 1.5) {
+        pos = tira.scrollLeft;
+        anim = null;
+      }
+      if (anim) {
+        const t = Math.min(1, (ahora - anim.t0) / DURACION);
+        ir(anim.desde + (anim.hasta - anim.desde) * suave(t));
+        if (t >= 1) {
+          anim = null;
+          proximo = ahora + ESPERA;
+        }
+      } else if (
+        !quieto &&
+        !encima &&
+        !arrastrando &&
+        ahora > pausaHasta &&
+        ahora > proximo
+      ) {
+        // Si quedó a mitad de camino (alguien la movió), primero se
+        // acomoda en la más cercana; si no, pasa a la siguiente.
+        const k = cercana();
+        pasarA(centroDe(Math.abs(pos - centroDe(k)) > 2 ? k : k + 1));
+      }
+      envolver();
+      curvar();
+      if (visible) cuadro = requestAnimationFrame(bucle);
+    };
+    const arrancar = () => {
+      if (!cuadro && visible) cuadro = requestAnimationFrame(bucle);
+    };
+
+    // Solo corre mientras la galería está en pantalla.
+    new IntersectionObserver(([e]) => {
+      visible = e.isIntersecting;
+      arrancar();
+    }).observe(tira);
+
+    // Arranca en la copia del medio, con la primera captura centrada.
+    const centrarInicio = () => {
+      medir();
+      const primera = items[porCopia];
+      ir(primera.offsetLeft + primera.offsetWidth / 2 - tira.clientWidth / 2);
+      curvar();
+    };
+    centrarInicio();
+    addEventListener('resize', centrarInicio, { passive: true });
+
+    tira.addEventListener('mouseenter', () => (encima = true));
+    tira.addEventListener('mouseleave', () => {
+      encima = false;
+      pausar(1200);
+    });
+    tira.addEventListener('touchstart', () => pausar(4000), { passive: true });
+    tira.addEventListener('wheel', () => pausar(2500), { passive: true });
+    tira.addEventListener('scroll', () => {
+      if (!cuadro) {
+        pos = tira.scrollLeft;
+        envolver();
+        curvar();
+      }
+    }, { passive: true });
+
+    // ── Arrastrar con el mouse ────────────────────────────────────────────
+    let inicioX = 0;
+    let inicioPos = 0;
+    let movio = false;
+
+    tira.addEventListener('pointerdown', (e) => {
+      if (e.pointerType !== 'mouse' || e.button !== 0) return;
+      arrastrando = true;
+      movio = false;
+      inicioX = e.clientX;
+      inicioPos = pos;
+    });
+    addEventListener('pointermove', (e) => {
+      if (!arrastrando) return;
+      const dx = e.clientX - inicioX;
+      // Un umbral chico, para que un click con pulso tembloroso siga siendo
+      // un click y abra el link.
+      if (!movio && Math.abs(dx) < 5) return;
+      if (!movio) {
+        movio = true;
+        tira.classList.add('is-arrastrando');
+      }
+      anim = null;
+      ir(inicioPos - dx);
+      envolver();
+      // Si envolvió, el punto de partida se corre con él.
+      inicioPos = pos + dx;
+    });
+    const soltar = () => {
+      if (!arrastrando) return;
+      arrastrando = false;
+      tira.classList.remove('is-arrastrando');
+      // Al soltar se acomoda en la tarjeta más cercana, y la próxima pasa
+      // después de la espera de siempre.
+      pasarA(centroDe(cercana()));
+      pausar(1500);
+    };
+    addEventListener('pointerup', soltar);
+    addEventListener('blur', soltar);
+
+    // Si hubo arrastre, el click que viene al soltar no abre el link.
+    tira.addEventListener(
+      'click',
+      (e) => {
+        if (!movio) return;
+        e.preventDefault();
+        e.stopPropagation();
+        movio = false;
+      },
+      true,
+    );
+  });
+</script>

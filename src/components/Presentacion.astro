@@ -1,0 +1,253 @@
+---
+import { presentacion } from '../data/site';
+
+/**
+ * La presentación: la primera sección después de la apertura.
+ *
+ * A la izquierda, un collage: la foto, una captura de proyecto inclinada
+ * apoyada encima y el saludo escrito a mano. A la derecha, el titular se
+ * escribe solo cuando entra en pantalla, con el cursor titilando al final,
+ * y debajo va la bio.
+ *
+ * ── El tipeo ─────────────────────────────────────────────────────────────
+ * El titular existe completo en el HTML; el tipeo es solo una capa visual.
+ * Hay tres copias del mismo texto, cada una con un trabajo:
+ *
+ *   sr-only     lo que leen los lectores de pantalla, siempre entero
+ *   fantasma    invisible, ocupa el lugar del texto completo para que el
+ *               bloque no crezca renglón a renglón mientras se escribe
+ *   tipeo       encima del fantasma, se llena letra por letra
+ *
+ * Sin JS, o con prefers-reduced-motion, el tipeo arranca lleno.
+ */
+---
+
+<section
+  id="presentacion"
+  class="py-[var(--section-pad)] md:py-[var(--section-pad-lg)]"
+>
+  <div class="air-container pres">
+    <div class="pres__collage">
+      <div class="air-reveal">
+        <figure class="pres__foto">
+          <img
+            src={presentacion.foto}
+            alt={presentacion.fotoAlt}
+            width="972"
+            height="1200"
+            loading="lazy"
+            decoding="async"
+          />
+        </figure>
+      </div>
+
+      {/* La captura va en un envoltorio propio: `.air-reveal` escribe
+          `transform` para la entrada y pisaría la inclinación. */}
+      <div class="pres__pantalla-pos air-reveal" style="--reveal-delay: 180ms">
+        <figure class="pres__pantalla">
+          <img
+            src={presentacion.pantalla}
+            alt={presentacion.pantallaAlt}
+            width="1920"
+            height="1080"
+            loading="lazy"
+            decoding="async"
+          />
+        </figure>
+      </div>
+
+      <p class="pres__saludo air-reveal" style="--reveal-delay: 320ms">
+        {presentacion.saludo}
+      </p>
+    </div>
+
+    <div class="pres__texto">
+      <h2 class="pres__titular" data-tipeo>
+        <span class="sr-only">{presentacion.titular}</span>
+        <span class="pres__capas" aria-hidden="true">
+          <span class="pres__fantasma">{presentacion.titular}</span>
+          <span class="pres__tipeo"
+            ><span data-tipeo-texto>{presentacion.titular}</span><span
+              class="pres__cursor"></span
+            ></span
+          >
+        </span>
+      </h2>
+      <p class="air-reveal pres__parrafo" style="--reveal-delay: 120ms">
+        {presentacion.texto}
+      </p>
+    </div>
+  </div>
+</section>
+
+<style>
+  .pres {
+    display: grid;
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+    align-items: center;
+    gap: clamp(40px, 6vw, 96px);
+  }
+
+  /* ── El collage ───────────────────────────────────────────────────────
+     La foto ocupa el 78% del ancho y deja aire a la derecha y abajo para
+     que la captura se apoye sobre su esquina sin taparle la cara. */
+  .pres__collage {
+    position: relative;
+    padding: 0 22% 14% 0;
+  }
+
+  .pres__foto {
+    margin: 0;
+    aspect-ratio: 4 / 5;
+    overflow: hidden;
+    border-radius: 28px;
+    box-shadow: 0 30px 60px -36px rgb(0 0 0 / 0.45);
+  }
+  .pres__foto img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 40% 28%;
+  }
+
+  .pres__pantalla-pos {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    width: 58%;
+  }
+  .pres__pantalla {
+    margin: 0;
+    aspect-ratio: 16 / 10;
+    overflow: hidden;
+    border: 6px solid var(--color-surface);
+    border-radius: 20px;
+    transform: rotate(-5deg);
+    box-shadow: 0 28px 50px -24px rgb(0 0 0 / 0.5);
+  }
+  .pres__pantalla img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    /* La captura es 16:9: se recorta por la derecha, así se ve el
+       comienzo del titular de la tienda y no una palabra cortada. */
+    object-position: left top;
+  }
+
+  .pres__saludo {
+    position: absolute;
+    top: 6%;
+    left: 58%;
+    margin: 0;
+    font-family: var(--font-control-cursive);
+    font-weight: var(--font-weight-medium);
+    font-size: clamp(2rem, 4vw, 3.5rem);
+    line-height: 1;
+    white-space: nowrap;
+    color: var(--color-rosewood);
+    rotate: -8deg;
+  }
+
+  /* ── El texto ─────────────────────────────────────────────────────── */
+  .pres__titular {
+    margin: 0;
+    max-width: 13ch;
+    font-family: var(--font-hero-display);
+    font-weight: 800;
+    font-size: clamp(2.25rem, 4.6vw, 4.25rem);
+    line-height: 1;
+    letter-spacing: -0.03em;
+    color: var(--color-ink);
+  }
+
+  .pres__capas {
+    position: relative;
+    display: block;
+  }
+  .pres__fantasma {
+    visibility: hidden;
+  }
+  .pres__tipeo {
+    position: absolute;
+    inset: 0;
+  }
+
+  .pres__cursor {
+    display: inline-block;
+    width: 0.06em;
+    height: 0.9em;
+    margin-left: 0.06em;
+    vertical-align: -0.08em;
+    background: currentColor;
+    animation: pres-titila 1s steps(1) infinite;
+  }
+  @keyframes pres-titila {
+    50% {
+      opacity: 0;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .pres__cursor {
+      animation: none;
+    }
+  }
+
+  .pres__parrafo {
+    max-width: 46ch;
+    margin: 1.75rem 0 0;
+    font-size: var(--text-body);
+    line-height: 1.6;
+    color: color-mix(in srgb, var(--color-ink) 75%, transparent);
+  }
+
+  /* En columna, el collage va primero y se achica para que el titular
+     entre en la primera pantalla junto con la foto. */
+  @media (max-width: 767px) {
+    .pres {
+      grid-template-columns: 1fr;
+    }
+    .pres__collage {
+      max-width: 420px;
+    }
+  }
+</style>
+
+<script>
+  // Escribe el titular letra por letra la primera vez que entra en pantalla.
+  const quieto = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  document.querySelectorAll<HTMLElement>('[data-tipeo]').forEach((titular) => {
+    const destino = titular.querySelector<HTMLElement>('[data-tipeo-texto]');
+    if (!destino || quieto || !('IntersectionObserver' in window)) return;
+
+    const texto = destino.textContent ?? '';
+    destino.textContent = '';
+
+    const escribir = () => {
+      let i = 0;
+      const paso = () => {
+        i++;
+        destino.textContent = texto.slice(0, i);
+        // Un poco irregular, como alguien tipeando, y una pausa después de
+        // cada palabra.
+        if (i < texto.length) {
+          const pausa = texto[i - 1] === ' ' ? 90 : 0;
+          setTimeout(paso, 38 + Math.random() * 40 + pausa);
+        }
+      };
+      paso();
+    };
+
+    const io = new IntersectionObserver(
+      (entradas) => {
+        if (!entradas.some((e) => e.isIntersecting)) return;
+        io.disconnect();
+        setTimeout(escribir, 250);
+      },
+      { threshold: 0.5 },
+    );
+    io.observe(titular);
+  });
+</script>

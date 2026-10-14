@@ -44,12 +44,10 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? site.url).toString()
     <!-- Marca la página como "con JS" antes del primer paint, para que las
          animaciones de reveal no provoquen un flash de contenido visible.
 
-         `wordmark-activo` va acá y no en el script del componente por una
-         razón de timing: mientras la pieza de apertura está en pantalla, el
-         logo de la nav tiene que estar oculto, y la nav se renderiza antes
-         de que corra cualquier script de componente. Puesto acá, la clase ya
-         existe cuando el navegador pinta la nav por primera vez y no hay un
-         frame con dos "Tati" a la vez.
+         `wordmark-activo` marca que la pieza de apertura está viva. Va acá
+         y no en el script del componente para que exista desde el primer
+         paint. (Antes también escondía el logo de la nav mientras el nombre
+         grande viajaba hacia él; el nombre grande ya no está.)
 
          Si el usuario pidió menos movimiento la pieza no existe, así que la
          clase tampoco: el logo de la nav se comporta como siempre. El script
@@ -155,7 +153,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? site.url).toString()
           getComputedStyle(document.documentElement).getPropertyValue(
             '--nav-height'
           )
-        ) || 72;
+        ) || 0;
 
       document.addEventListener('click', (event) => {
         if (!lenis) return;

@@ -164,7 +164,10 @@
   --section-pad-lg: 72px;
   --card-padding: 20px;
   --element-gap: 8px;
-  --nav-height: 72px;
+  /* 0 desde el 2026-10-13: la barra de navegación se sacó para que la
+     apertura quede a pantalla completa. Nav.astro sigue en el repo; si
+     vuelve, esto vuelve a 72px y los saltos a anclas la descuentan solos. */
+  --nav-height: 0px;
 }
 
 /* ── Escala de espaciado nombrada del sistema Air ───────────────────────────

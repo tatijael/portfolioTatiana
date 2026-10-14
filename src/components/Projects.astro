@@ -1,6 +1,5 @@
 ---
 import { projects } from '../data/site';
-import SectionHeader from './ui/SectionHeader.astro';
 
 /**
  * Proyectos — una pila de tarjetas que se tapan al scrollear.
@@ -54,13 +53,10 @@ const fallbacks = [
   class="py-[var(--section-pad)] md:py-[var(--section-pad-lg)]"
 >
   <div class="air-container flex flex-col gap-[var(--section-gap)]">
-    <SectionHeader
-      eyebrow="Proyectos"
-      before="Cosas que construí y siguen"
-      cursive="andando"
-      after="."
-      subtitle="E-commerce headless, productos con backend propio y sitios estáticos. Cada uno con su decisión técnica detrás."
-    />
+    {/* Solo la etiqueta: el titular y el subtítulo se sacaron el
+        2026-10-13 para que las tarjetas hablen solas. Es un h2 para que la
+        sección siga teniendo título para lectores de pantalla. */}
+    <h2 class="air-reveal air-eyebrow m-0">Proyectos</h2>
 
     <ol class="pila">
       {
