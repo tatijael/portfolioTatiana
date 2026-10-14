@@ -105,6 +105,13 @@ import { temas } from '../data/site';
     transform: translateY(-50%);
     z-index: 50;
   }
+  /* En el teléfono tapaba el texto al costado: ahí no existe, y el sitio
+     queda en el tema por defecto (Layout no lee el guardado). */
+  @media (max-width: 767px) {
+    :global(html.js) .tema {
+      display: none;
+    }
+  }
 
   .tema__pastilla {
     display: flex;

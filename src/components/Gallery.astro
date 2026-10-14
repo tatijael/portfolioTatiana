@@ -126,6 +126,13 @@ const copias = [0, 1, 2];
     flex: none;
     width: clamp(240px, 34vw, 520px);
   }
+  /* En el teléfono la tarjeta casi llena el ancho: con 240px la captura
+     no se leía. Asoman los cantos de las vecinas. */
+  @media (max-width: 767px) {
+    .gal__item {
+      width: 84vw;
+    }
+  }
   .gal__figura {
     margin: 0;
     transform-style: preserve-3d;
