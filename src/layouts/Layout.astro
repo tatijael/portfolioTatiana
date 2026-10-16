@@ -66,11 +66,11 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? site.url).toString()
          Si cambia `TEMA_CLAVE` en site.ts, hay que cambiarla acá.
 
          En el teléfono el selector no se muestra (TemaSwitch), así que
-         tampoco se lee lo guardado: siempre va el tema por defecto, el mismo
-         con el que arranca el escritorio. El corte es el de TemaSwitch. -->
+         tampoco se lee lo guardado: siempre va "noche", que es como Tatiana
+         quiere que se vea en mobile. El corte es el de TemaSwitch. -->
     <script is:inline>
       try {
-        var t = matchMedia('(min-width: 768px)').matches && localStorage.getItem('tati:tema');
+        var t = matchMedia('(min-width: 768px)').matches ? localStorage.getItem('tati:tema') : 'noche';
         if (t) document.documentElement.dataset.tema = t;
       } catch (e) {
         // Storage bloqueado: se queda en el tema por defecto.

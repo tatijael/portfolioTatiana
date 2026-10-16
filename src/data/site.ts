@@ -318,14 +318,15 @@ export const projects: readonly Project[] = [
   },
   {
     // ganly.net — WordPress con GeneratePress, bilingüe EN/ES.
-    // TODO: confirmá el año.
+    // Trabajo de 2026 (análisis y presupuesto de abril, snippets de julio):
+    // ver ~/Documents/Tatiana/proyecto-arte. El sitio existía desde antes.
     title: 'Marcela Ganly Sculpture',
-    year: '2021 — 2024',
+    year: '2026',
     category: 'Web',
-    summary: 'Sitio de autor para una escultora en bronce.',
+    summary: 'Sitio de autor para una escultora en bronce, con un primer paso hacia la venta online.',
     detail:
-      'Armé el sitio completo de la artista: la obra organizada por colecciones (bronce figurativo y de forma libre, metal y resina, escultura para llevar puesta), la página de la artista, contacto por WhatsApp, versión en inglés y en español, y responsive.',
-    stack: ['WordPress', 'GeneratePress', 'GenerateBlocks', 'CSS', 'JavaScript'],
+      'Marcela tenía un WordPress a medio hacer y quería empezar a vender, pero por lo más sencillo. En vez de montar una tienda con carrito y pagos, armé un catálogo de obra: cada pieza tiene su ficha con material, edición, medidas en pulgadas y cm, y un estado de disponible o vendida que ella cambia con un switch. El botón "Enquire about this piece" arma la consulta sola con el nombre de la obra, en inglés o en español según el visitante. Así vende por consulta directa sin pagar un plan de e-commerce, y la tienda completa queda para una segunda etapa. Sumé las colecciones, la página de la artista, contacto por WhatsApp, versión bilingüe, responsive y una guía para que cargue sus obras sola.',
+    stack: ['WordPress', 'GeneratePress', 'PHP', 'ACF', 'CSS', 'JavaScript'],
     live: 'https://ganly.net',
     repo: null,
     image: '/images/ganly.jpg',
@@ -552,12 +553,10 @@ export const skills = {
     'Figma',
     'Git / GitHub',
     'Asana',
-    'Jira',
-    'CI/CD con GitHub Actions',
     'Cypress',
     'Jest',
     'WordPress',
-    'IA: Claude, Codex, ChatGPT, Copilot',
+    'IA: Claude, ChatGPT, Copilot',
   ],
 } as const;
 

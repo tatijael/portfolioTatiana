@@ -18,12 +18,11 @@ import {
 } from '../data/site';
 
 const linkedin = socials.find((s) => s.label === 'LinkedIn')?.href;
-const github = socials.find((s) => s.label === 'GitHub')?.href;
 const sinProtocolo = (u?: string) => u?.replace(/^https?:\/\/(www\.)?/, '');
 
 // Solo el trabajo para clientes: los proyectos propios ya están en el sitio.
 const destacados = projects.filter((p) =>
-  ['ZYN — Storefront B2C + B2B', 'Extensiones de checkout y admin', 'Back-office para Shopify', 'Bendito Aceite'].includes(
+  ['ZYN — Storefront B2C + B2B', 'Extensiones de checkout y admin', 'Back-office para Shopify', 'Bendito Aceite', 'Marcela Ganly Sculpture'].includes(
     p.title,
   ),
 );
@@ -45,8 +44,6 @@ const destacados = projects.filter((p) =>
         <p class="contacto">
           {site.location} · <a href={`mailto:${site.email}`}>{site.email}</a>
           {linkedin && <> · <a href={linkedin}>{sinProtocolo(linkedin)}</a></>}
-          {github && <> · <a href={github}>{sinProtocolo(github)}</a></>}
-          {' · '}<a href={site.url}>{sinProtocolo(site.url)}</a>
         </p>
         <p class="resumen">{site.description}</p>
       </header>

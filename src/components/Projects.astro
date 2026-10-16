@@ -245,7 +245,12 @@ const fallbacks = [
     display: none;
   }
   @media (max-width: 899px) {
+    /* El ancho fijo es lo que importa: con solo aspect-ratio + max-height,
+       al llegar al tope de alto la caja se angostaba para mantener la
+       proporción y la imagen quedaba al 75% del ancho de la tarjeta. Así
+       el tope recorta el alto y la imagen llena el ancho igual (cover). */
     .pila__medio {
+      width: 100%;
       aspect-ratio: 16 / 9;
       max-height: 28svh;
     }
